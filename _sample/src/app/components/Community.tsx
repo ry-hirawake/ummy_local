@@ -1,5 +1,7 @@
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, TrendingUp, ThumbsUp, Laugh, Lightbulb, PartyPopper, Send, ChevronDown, ChevronUp } from "lucide-react";
+import { Users, Bell, Settings, Search, Pin, TrendingUp, Calendar, Image as ImageIcon, Send } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useParams } from "react-router";
+import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, ThumbsUp, Laugh, Lightbulb, PartyPopper } from "lucide-react";
 import { useState } from "react";
 
 interface Comment {
@@ -14,7 +16,7 @@ interface Comment {
   replies?: Comment[];
 }
 
-interface Post {
+interface CommunityPost {
   id: string;
   author: {
     name: string;
@@ -26,7 +28,6 @@ interface Post {
   likes: number;
   comments: number;
   shares: number;
-  image?: string;
   reactions: {
     thumbsUp: number;
     partyPopper: number;
@@ -34,11 +35,49 @@ interface Post {
     laugh: number;
   };
   userReaction?: string;
-  community?: string;
+  isPinned?: boolean;
   commentList?: Comment[];
 }
 
-const mockPosts: Post[] = [
+const communityData = {
+  "1": {
+    name: "全社アナウンス",
+    icon: "📢",
+    members: 245,
+    description: "会社からの重要なお知らせや全社に関わる情報を共有するコミュニティです",
+    banner: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&h=300&fit=crop",
+  },
+  "2": {
+    name: "エンジニアリング",
+    icon: "💻",
+    members: 89,
+    description: "技術的な議論、コードレビュー、新しい技術の共有を行うエンジニアのためのコミュニティ",
+    banner: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&h=300&fit=crop",
+  },
+  "3": {
+    name: "デザイン",
+    icon: "🎨",
+    members: 42,
+    description: "デザインのアイデア、フィードバック、トレンドを共有するクリエイティブなスペース",
+    banner: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=1200&h=300&fit=crop",
+  },
+  "4": {
+    name: "マーケティング",
+    icon: "📊",
+    members: 56,
+    description: "マーケティング戦略、キャンペーン結果、市場分析を共有するコミュニティ",
+    banner: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&h=300&fit=crop",
+  },
+  "5": {
+    name: "雑談",
+    icon: "☕",
+    members: 178,
+    description: "リラックスした雰囲気で自由に会話を楽しむカジュアルなコミュニティ",
+    banner: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1200&h=300&fit=crop",
+  },
+};
+
+const mockCommunityPosts: CommunityPost[] = [
   {
     id: "1",
     author: {
@@ -46,28 +85,28 @@ const mockPosts: Post[] = [
       role: "マーケティングマネージャー",
       avatar: "https://images.unsplash.com/photo-1689600944138-da3b150d9cb8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHByb2Zlc3Npb25hbCUyMGhlYWRzaG90fGVufDF8fHx8MTc3MjM4MDMxMnww&ixlib=rb-4.1.0&q=80&w=1080",
     },
-    content: "新しい製品ローンチキャンペーンが大成功を収めました！チーム全員の努力のおかげです。素晴らしい結果を達成できたことを誇りに思います 🎉\n\n主な成果：\n✅ 目標の150%達成\n✅ 新規顧客獲得数が過去最高\n✅ SNSエンゲージメント300%増加\n\nみなさんの協力に感謝します！",
-    timestamp: "2時間前",
+    content: "次回のオールハンズミーティングは来週金曜日14:00からです。全員参加必須です。\n\nアジェンダ：\n• Q4の業績レビュー\n• 新製品発表\n• チーム再編成のお知らせ\n\nZoomリンクは後ほど共有します。",
+    timestamp: "1時間前",
     likes: 42,
     comments: 8,
     shares: 3,
-    community: "📊 マーケティング",
     reactions: {
-      thumbsUp: 25,
-      partyPopper: 12,
-      lightbulb: 3,
-      laugh: 2,
+      thumbsUp: 35,
+      partyPopper: 5,
+      lightbulb: 2,
+      laugh: 0,
     },
+    isPinned: true,
     commentList: [
       {
         id: "c1",
         author: {
-          name: "佐藤 健太",
-          avatar: "https://images.unsplash.com/photo-1554765345-6ad6a5417cde?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYW4lMjBwcm9mZXNzaW9uYWwlMjBwb3J0cmFpdHxlbnwxfHx8fDE3NzI0MjMyODh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+          name: "山田 太郎",
+          avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYW4lMjBwcm9mZXNzaW9uYWwlMjBwb3J0cmFpdHxlbnwxfHx8fDE3NzI0MjMyODh8MA&ixlib=rb-4.1.0&q=80&w=1080",
         },
-        content: "素晴らしい成果ですね！おめでとうございます🎊",
-        timestamp: "1時間前",
-        likes: 5,
+        content: "Zoomリンクはいつ頃共有される予定でしょうか？カレンダーに登録しておきたいです。",
+        timestamp: "45分前",
+        likes: 3,
         replies: [
           {
             id: "c1-r1",
@@ -75,43 +114,21 @@ const mockPosts: Post[] = [
               name: "田中 美咲",
               avatar: "https://images.unsplash.com/photo-1689600944138-da3b150d9cb8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHByb2Zlc3Npb25hbCUyMGhlYWRzaG90fGVufDF8fHx8MTc3MjM4MDMxMnww&ixlib=rb-4.1.0&q=80&w=1080",
             },
-            content: "ありがとうございます！チーム全員の協力があってこその成果です😊",
-            timestamp: "50分前",
-            likes: 3,
+            content: "今週水曜日までには共有します！カレンダー招待も一緒に送りますので、そちらにリンクが記載されます✨",
+            timestamp: "30分前",
+            likes: 2,
           },
         ],
       },
       {
         id: "c2",
         author: {
-          name: "鈴木 愛",
-          avatar: "https://images.unsplash.com/photo-1507611268508-bf74edce9029?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhc2lhbiUyMHdvbWFuJTIwYnVzaW5lc3N8ZW58MXx8fHwxNzcyNDc2OTE5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+          name: "佐々木 花子",
+          avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b21hbiUyMGJ1c2luZXNzJTIwcG9ydHJhaXR8ZW58MXx8fHwxNzcyNDc2OTE5fDA&ixlib=rb-4.1.0&q=80&w=1080",
         },
-        content: "SNSエンゲージメント300%増加は驚異的ですね！どの施策が最も効果的でしたか？",
-        timestamp: "45分前",
-        likes: 8,
-        replies: [
-          {
-            id: "c2-r1",
-            author: {
-              name: "田中 美咲",
-              avatar: "https://images.unsplash.com/photo-1689600944138-da3b150d9cb8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHByb2Zlc3Npb25hbCUyMGhlYWRzaG90fGVufDF8fHx8MTc3MjM4MDMxMnww&ixlib=rb-4.1.0&q=80&w=1080",
-            },
-            content: "インフルエンサーとのコラボレーションと、ユーザー生成コンテンツキャンペーンが特に効果的でした！詳細は来週の全体会議で共有します📊",
-            timestamp: "30分前",
-            likes: 6,
-          },
-          {
-            id: "c2-r2",
-            author: {
-              name: "鈴木 愛",
-              avatar: "https://images.unsplash.com/photo-1507611268508-bf74edce9029?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhc2lhbiUyMHdvbWFuJTIwYnVzaW5lc3N8ZW58MXx8fHwxNzcyNDc2OTE5fDA&ixlib=rb-4.1.0&q=80&w=1080",
-            },
-            content: "楽しみにしています！ありがとうございます✨",
-            timestamp: "25分前",
-            likes: 2,
-          },
-        ],
+        content: "新製品発表、楽しみです！何かサプライズがあるのでしょうか？👀",
+        timestamp: "40分前",
+        likes: 5,
       },
     ],
   },
@@ -122,20 +139,42 @@ const mockPosts: Post[] = [
       role: "シニアデベロッパー",
       avatar: "https://images.unsplash.com/photo-1554765345-6ad6a5417cde?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYW4lMjBwcm9mZXNzaW9uYWwlMjBwb3J0cmFpdHxlbnwxfHx8fDE3NzI0MjMyODh8MA&ixlib=rb-4.1.0&q=80&w=1080",
     },
-    content: "今日のテックトークセッション「新しいアーキテクチャパターン」にご参加いただきありがとうございました！\n\n多くの質問をいただき、とても有意義でした。セッション資料とコードサンプルはSlackの#engineeringチャンネルで共有します。\n\n次回は来週木曜日、GraphQL実装について話します！",
-    timestamp: "4時間前",
+    content: "新しいデプロイメントパイプラインが稼働開始しました！🚀\n\nビルド時間が50%短縮され、自動テストも大幅に改善されています。詳細はConfluenceのドキュメントをご確認ください。",
+    timestamp: "3時間前",
     likes: 28,
     comments: 12,
     shares: 5,
-    community: "💻 エンジニアリング",
     reactions: {
-      thumbsUp: 18,
-      partyPopper: 5,
-      lightbulb: 8,
+      thumbsUp: 22,
+      partyPopper: 8,
+      lightbulb: 5,
       laugh: 1,
     },
     userReaction: "lightbulb",
-    commentList: [],
+    commentList: [
+      {
+        id: "c3",
+        author: {
+          name: "高橋 誠",
+          avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYW4lMjBwb3J0cmFpdHxlbnwxfHx8fDE3NzI0MjMyODh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+        },
+        content: "素晴らしい改善ですね！これで開発効率が大幅に上がりそうです💪",
+        timestamp: "2時間前",
+        likes: 4,
+        replies: [
+          {
+            id: "c3-r1",
+            author: {
+              name: "佐藤 健太",
+              avatar: "https://images.unsplash.com/photo-1554765345-6ad6a5417cde?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYW4lMjBwcm9mZXNzaW9uYWwlMjBwb3J0cmFpdHxlbnwxfHx8fDE3NzI0MjMyODh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+            },
+            content: "はい！早速チームメンバーからもポジティブなフィードバックをもらっています。次のスプリントではさらに最適化を進める予定です🚀",
+            timestamp: "1時間前",
+            likes: 3,
+          },
+        ],
+      },
+    ],
   },
   {
     id: "3",
@@ -144,17 +183,16 @@ const mockPosts: Post[] = [
       role: "プロダクトデザイナー",
       avatar: "https://images.unsplash.com/photo-1507611268508-bf74edce9029?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhc2lhbiUyMHdvbWFuJTIwYnVzaW5lc3N8ZW58MXx8fHwxNzcyNDc2OTE5fDA&ixlib=rb-4.1.0&q=80&w=1080",
     },
-    content: "新しいUIデザインシステムのプロトタイプが完成しました！ 🎨\n\nユーザビリティテストの結果も上々で、タスク完了時間が40%短縮されました。皆さんのフィードバックをお待ちしています。\n\nFigmaリンク: [デザインシステムv2.0]\n\n#デザイン #UX #プロトタイプ",
-    timestamp: "6時間前",
-    likes: 56,
-    comments: 15,
-    shares: 8,
-    community: "🎨 デザイン",
+    content: "チームランチのお誘いです！🍱\n\n明日12:30から新しくオープンしたイタリアンレストランに行きます。参加希望の方はこの投稿にリアクションをお願いします！",
+    timestamp: "5時間前",
+    likes: 45,
+    comments: 18,
+    shares: 2,
     reactions: {
-      thumbsUp: 30,
-      partyPopper: 15,
-      lightbulb: 9,
-      laugh: 2,
+      thumbsUp: 25,
+      partyPopper: 12,
+      lightbulb: 1,
+      laugh: 7,
     },
     commentList: [],
   },
@@ -167,11 +205,15 @@ const reactionIcons = {
   laugh: { icon: Laugh, label: "笑", color: "text-green-500" },
 };
 
-export function Feed() {
-  const [posts, setPosts] = useState(mockPosts);
+export function Community() {
+  const { id } = useParams();
+  const [posts, setPosts] = useState(mockCommunityPosts);
   const [showReactions, setShowReactions] = useState<string | null>(null);
   const [expandedComments, setExpandedComments] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [isJoined, setIsJoined] = useState(true);
+
+  const community = communityData[id as keyof typeof communityData] || communityData["1"];
 
   const handleReaction = (postId: string, reactionType: string) => {
     setPosts(posts.map(post => {
@@ -272,7 +314,122 @@ export function Feed() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-6 py-6">
+      {/* Community Header */}
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="border-b border-border/50 bg-card"
+      >
+        {/* Banner */}
+        <div className="relative h-40 overflow-hidden bg-gradient-to-r from-primary/20 to-orange-500/20">
+          <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent" />
+          <div className="absolute bottom-6 left-0 right-0 mx-auto max-w-4xl px-6">
+            <div className="flex items-end gap-4">
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl border-4 border-card bg-gradient-to-br from-primary to-orange-600 text-4xl shadow-xl">
+                {community.icon}
+              </div>
+              <div className="mb-2 flex-1">
+                <h1 className="text-2xl font-bold">{community.name}</h1>
+                <p className="text-sm text-muted-foreground">{community.members}人のメンバー</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Community Info & Actions */}
+        <div className="mx-auto max-w-4xl px-6 py-4">
+          <div className="flex items-start justify-between gap-4">
+            <p className="flex-1 text-sm text-muted-foreground">{community.description}</p>
+            <div className="flex gap-2">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsJoined(!isJoined)}
+                className={`rounded-lg px-5 py-2 text-sm font-semibold transition-all ${
+                  isJoined
+                    ? "border border-border bg-secondary text-foreground hover:bg-muted"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90"
+                }`}
+              >
+                {isJoined ? "参加中" : "参加する"}
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="rounded-lg border border-border bg-secondary p-2 transition-all hover:bg-muted"
+              >
+                <Bell className="h-5 w-5" />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="rounded-lg border border-border bg-secondary p-2 transition-all hover:bg-muted"
+              >
+                <Settings className="h-5 w-5" />
+              </motion.button>
+            </div>
+          </div>
+
+          {/* Community Tabs */}
+          <div className="mt-4 flex gap-6 border-b border-border/50">
+            <button className="border-b-2 border-primary pb-2 text-sm font-semibold text-primary">
+              投稿
+            </button>
+            <button className="pb-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              メンバー
+            </button>
+            <button className="pb-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              ファイル
+            </button>
+            <button className="pb-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              イベント
+            </button>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Community Content */}
+      <div className="mx-auto max-w-4xl px-6 py-6">
+        {/* Create Post */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="mb-4 overflow-hidden rounded-lg border border-border/50 bg-card p-4 shadow-sm"
+        >
+          <div className="flex gap-3">
+            <img
+              src="https://images.unsplash.com/photo-1689600944138-da3b150d9cb8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHByb2Zlc3Npb25hbCUyMGhlYWRzaG90fGVufDF8fHx8MTc3MjM4MDMxMnww&ixlib=rb-4.1.0&q=80&w=1080"
+              alt="Your avatar"
+              className="h-10 w-10 rounded-full object-cover"
+            />
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder={`${community.name}で共有...`}
+                className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm outline-none transition-all focus:border-primary/50 focus:bg-background"
+              />
+              <div className="mt-3 flex gap-2">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-2 rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium transition-all hover:bg-muted"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  画像
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-2 rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium transition-all hover:bg-muted"
+                >
+                  <Calendar className="h-4 w-4" />
+                  イベント
+                </motion.button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Posts */}
         <div className="space-y-4">
           {posts.map((post, index) => (
@@ -283,6 +440,14 @@ export function Feed() {
               transition={{ delay: index * 0.1 }}
               className="overflow-hidden rounded-lg border border-border/50 bg-card shadow-sm transition-all hover:shadow-md"
             >
+              {/* Pinned Badge */}
+              {post.isPinned && (
+                <div className="flex items-center gap-2 border-b border-border/50 bg-primary/10 px-4 py-2 text-xs font-medium text-primary">
+                  <Pin className="h-3.5 w-3.5" />
+                  ピン留めされた投稿
+                </div>
+              )}
+
               {/* Post Header */}
               <div className="flex items-start justify-between p-4 pb-3">
                 <div className="flex gap-3">
@@ -297,12 +462,6 @@ export function Feed() {
                     <p className="text-xs text-muted-foreground">{post.author.role}</p>
                     <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
                       <span>{post.timestamp}</span>
-                      {post.community && (
-                        <>
-                          <span>•</span>
-                          <span className="text-primary">{post.community}</span>
-                        </>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -480,22 +639,6 @@ export function Feed() {
             </motion.article>
           ))}
         </div>
-
-        {/* Load More */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-6 flex justify-center"
-        >
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="flex items-center gap-2 rounded-lg border border-border bg-card px-6 py-2.5 text-sm font-medium shadow-sm transition-all hover:bg-secondary"
-          >
-            さらに読み込む
-          </motion.button>
-        </motion.div>
       </div>
     </div>
   );
