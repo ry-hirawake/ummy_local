@@ -34,7 +34,6 @@
 
 ### Active Stories (maintain manually)
 - story-0001: ./02_specs/stories/story-0001.md
-- story-0002: ./02_specs/stories/story-0002.md
 
 ---
 
@@ -43,8 +42,7 @@
 - ADRs Directory: ./03_design/adrs/
 
 ### Key ADRs (maintain manually)
-- adr-0001: ./03_design/adrs/adr-0001.md
-- adr-0002: ./03_design/adrs/adr-0002.md
+- なし（2026-03-27時点）
 
 ---
 
@@ -59,7 +57,7 @@
 - Research Notes Directory: ./05_research/notes/
 
 ### Key Research Notes (maintain manually)
-- research-0001: ./05_research/notes/research-0001.md
+- なし（2026-03-27時点）
 
 ---
 

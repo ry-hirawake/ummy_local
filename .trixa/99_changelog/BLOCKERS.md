@@ -5,4 +5,4 @@
 
 ---
 
-- Story-0001: <blocker> / owner:Gemini / since:YYYY-MM-DD / next:<action>
+（なし）

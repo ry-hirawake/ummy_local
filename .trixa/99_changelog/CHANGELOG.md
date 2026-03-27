@@ -6,4 +6,4 @@
 
 ---
 
-- YYYY-MM-DD Story-XXXX: <Decision> / <Impact> / <Migration?>
+- 2026-03-27 Story-0001: ホームフィード分割・モックデータ外出し・next/image移行完了 / Impact: app/page.tsx 610行→98行、Presentational Component化、テスト17件追加
