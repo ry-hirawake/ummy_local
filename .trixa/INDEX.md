@@ -34,6 +34,7 @@
 
 ### Active Stories (maintain manually)
 - story-0001: ./02_specs/stories/story-0001.md
+- story-0002: ./02_specs/stories/story-0002.md
 
 ---
 

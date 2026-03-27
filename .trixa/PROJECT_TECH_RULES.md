@@ -226,7 +226,54 @@ Accepted
 
 ---
 
-## 10) 変更履歴（このファイル内）
+## 10) ディレクトリ構造とスコープ
+
+### 本体ディレクトリ（編集対象）
+本体アプリの実装対象は `src/` 配下に集約する。
+
+```
+src/
+├── app/           # Next.js App Router (pages, layouts)
+├── components/    # 再利用可能UIコンポーネント
+├── lib/           # 共通ロジック、ヘルパー、モックデータ
+├── types/         # 型定義
+└── __tests__/     # テストファイル
+```
+
+### 参照専用ディレクトリ（編集対象外）
+- `_sample/`: 参照用サンプルコード。本体の品質ゲート（lint/build/test）対象外
+- `public/`: 静的アセット
+
+### 品質ゲート対象の境界
+- TypeScript: `tsconfig.json` で `_sample` を exclude
+- ESLint: `eslint.config.mjs` で `_sample/**` を ignore
+- テスト: `src/__tests__/` 配下のみ
+
+### パスエイリアス
+- `@/*` は `./src/*` に解決される（tsconfig.json, vitest.config.ts）
+
+---
+
+## 11) テスト命名と追跡
+
+### テストファイル命名規則
+- テストファイルは **機能/層ベース** で命名する（Story ID ではなく）
+- 例: `home-feed.integration.test.tsx`, `PostCard.test.tsx`
+
+### Story との対応追跡
+- テストファイル名に Story ID を埋め込まない
+- Story と テストの対応は SSOT で追跡する:
+  - `story-XXXX.md` の `Test Mapping` セクション
+  - `.trixa/04_tests/TRACEABILITY.md`（全体対応表）
+
+### テスト配置
+- 統合テスト: `src/__tests__/`
+- コンポーネントテスト: 対象コンポーネントと同階層（`*.test.tsx`）
+
+---
+
+## 12) 変更履歴（このファイル内）
 - 2026-03-27（初版）：初版作成（現在の実装状況を反映） / reason: PROJECT_CHARTER確定後の技術方針策定 / impact: 今後の実装の指針となる
 - 2026-03-27（更新1）：UI/ロジック分離ルールを明確化、技術的負債を明記 / reason: Presentational/Container分離方針の確定 / impact: 段階的リファクタリングの指針
 - 2026-03-27（更新2）：TypeScript/Next.js 16/React 19のベストプラクティスを追加 / reason: フレームワーク標準に準拠 / impact: パフォーマンス・セキュリティ・保守性向上
+- 2026-03-27（更新3）：ディレクトリ構造とテスト命名規則を追加 / reason: Story-0002でrepo構造正規化 / impact: 本体/参照物の境界明確化、テスト追跡方針確定
