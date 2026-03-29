@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
 import {
@@ -85,9 +86,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 whileHover={{ scale: 1.05 }}
                 className="h-9 w-9 cursor-pointer overflow-hidden rounded-full border-2 border-primary/20"
               >
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1689600944138-da3b150d9cb8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHByb2Zlc3Npb25hbCUyMGhlYWRzaG90fGVufDF8fHx8MTc3MjM4MDMxMnww&ixlib=rb-4.1.0&q=80&w=1080"
                   alt="Profile"
+                  width={36}
+                  height={36}
                   className="h-full w-full object-cover"
                 />
               </motion.div>

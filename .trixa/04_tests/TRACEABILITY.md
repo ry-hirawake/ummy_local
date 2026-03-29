@@ -39,3 +39,12 @@ Story単位の対応表に加え、プロジェクト全体で「要件/ACがテ
 | AC-3 | `src/__tests__/community-feed.integration.test.tsx` | `CommunityFeed / Interactions` | リアクション切替、コメント表示、返信入力 |
 | AC-4 | `src/__tests__/community-feed.integration.test.tsx` | `CommunityFeed / InvalidCommunity` | notFound()呼び出し、not-found.tsx存在 |
 | AC-5 | `src/__tests__/community-feed.integration.test.tsx` | `CommunityFeed / ImageOptimization` | next/image使用、CommentItem再利用 |
+
+### Story-0004: 依存関係と品質ゲートを復旧しローカル開発を再現可能にする
+
+| AC | Verification | Location | Notes |
+|---|---|---|---|
+| AC-1 | 依存解決検証 | `package.json`, `package-lock.json`, `README.md`, 実行コマンド | 標準インストール手順で script 起動可能 |
+| AC-2 | lint 検証 | `npm run lint`, `src/components/AppLayout.tsx`, `src/__tests__/community-feed.integration.test.tsx` | warning 0、`<img>` 解消、未使用変数解消 |
+| AC-3 | 統合テスト実行 | `src/__tests__/home-feed.integration.test.tsx`, `src/__tests__/community-feed.integration.test.tsx`, `vitest.setup.tsx` | 既存 Story の回帰防止 |
+| AC-4 | build 検証 | `npm run build`, `src/app/layout.tsx`, `README.md` | フォント取得方針を含む再現性確認 |

@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ummy
 
-## Getting Started
+Viva Engage風の社内SNSプラットフォーム。技術的議論を1箇所に集約し、非同期コラボレーションを促進する。
 
-First, run the development server:
+## 前提条件
+
+- Node.js 20.x LTS 以上
+- npm（`package-lock.json` による再現性確保のため `npm ci` を使用）
+
+## セットアップ
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 依存関係のインストール（lockfile に基づく再現可能なインストール）
+npm ci
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 開発
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# 開発サーバー起動
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+[http://localhost:3000](http://localhost:3000) をブラウザで開く。
 
-## Learn More
+## 品質ゲート
 
-To learn more about Next.js, take a look at the following resources:
+以下のコマンドがすべて成功することがマージ/リリースの前提条件。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Lint（error 0, warning 0）
+npm run lint
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# テスト実行（全テスト green）
+npm run test:run
 
-## Deploy on Vercel
+# Production build
+npm run build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## フォント
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Geist フォント（Sans / Mono）を `next/font/local` でローカル読み込みしている。フォントファイルは `src/app/fonts/` に配置済みのため、build 時に外部ネットワーク（Google Fonts）への接続は不要。
+
+## ディレクトリ構造
+
+```
+src/
+├── app/           # Next.js App Router（pages, layouts）
+├── components/    # 再利用可能UIコンポーネント
+├── lib/           # 共通ロジック、ヘルパー、モックデータ
+├── types/         # 型定義
+└── __tests__/     # 統合テスト
+```
+
+- `_sample/` は参照専用ディレクトリ。本体の lint / build / test 対象外。
+- 詳細は `.trixa/` 配下のSSOTを参照。
+
+## 技術スタック
+
+- Next.js 16 (App Router) / React 19 / TypeScript 5
+- Tailwind CSS 4 / Motion 12 / Lucide React
+- Vitest + Testing Library（テスト）
