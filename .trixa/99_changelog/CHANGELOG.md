@@ -17,3 +17,4 @@
 - 2026-03-30 Story-0005〜0019: 未解消論点を解消し Accepted候補まで具体化 / Impact: Claude 実装前の仕様補完余地を削減
 - 2026-03-30 Story-0005〜0019: Status を Accepted に更新し、Claude着手順を Delivery Plan に固定 / Impact: 実装Readyのバックログと優先順がSSOTで確定
 - 2026-03-30 Delivery Plan/Blockers: Claude は 1 Story ずつ逐次着手とし、開始対象を `story-0005` に固定 / Impact: 並行実装による仕様逸脱を防止
+- 2026-03-30 Story-0005: 認証ガード実装完了（middleware.ts ルート保護、mock auth provider、httpOnly cookie セッション、ログイン画面、ログアウト、AuthContext、テスト17件追加） / Impact: 未認証アクセス遮断、FR-9.1/BC-2準拠、将来Cognito差替え可能な抽象化

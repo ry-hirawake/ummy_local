@@ -4,8 +4,7 @@
 - Story-XXXX: <blocker> / owner:<agent> / since:<YYYY-MM-DD> / next:<action>
 
 ---
-- Story-0005: Claude の現在の実装着手対象は `story-0005` のみ。`story-0018` 以降へ進んではならない / owner:claude / since:2026-03-30 / next:`story-0005` を実装し `Implemented` まで進め、Codex レビュー後に次Story着手可否を判断する
-- Story-0018: 逐次実装ルールにより `story-0005` 完了前は着手禁止 / owner:claude / since:2026-03-30 / next:`story-0005` の実装・レビュー完了後に着手する
+- Story-0018: Claude の現在の実装着手対象は `story-0018` のみ。`story-0006` 以降へ進んではならない / owner:claude / since:2026-03-30 / next:`story-0018` を実装し `Implemented` まで進め、Codex レビュー後に次Story着手可否を判断する
 - Story-0006: 逐次実装ルールにより直前Story完了前は着手禁止 / owner:claude / since:2026-03-30 / next:`story-0018` 完了後に着手する
 - Story-0007: 逐次実装ルールにより直前Story完了前は着手禁止 / owner:claude / since:2026-03-30 / next:`story-0006` 完了後に着手する
 - Story-0008: 逐次実装ルールにより直前Story完了前は着手禁止 / owner:claude / since:2026-03-30 / next:`story-0007` 完了後に着手する

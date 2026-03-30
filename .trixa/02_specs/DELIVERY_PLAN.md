@@ -50,28 +50,28 @@ Accepted
 
 ## Implementation Start Memo
 - Current target:
-  - Claude は [story-0005.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0005.md) から着手する
+  - Claude は [story-0018.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0018.md) から着手する
 - Read first:
-  - [story-0005.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0005.md)
-  - [adr-0001.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/03_design/adrs/adr-0001.md)
+  - [story-0018.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0018.md)
+  - [adr-0003.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/03_design/adrs/adr-0003.md)
   - [REQUIREMENTS.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/01_requirements/REQUIREMENTS.md)
   - [CONSTRAINTS.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/01_requirements/CONSTRAINTS.md)
 - Implementation objective:
-  - 未認証ユーザーが `/` と `/community/[id]` へ入れないこと
-  - 認証済みユーザーは既存ホーム/コミュニティ詳細を壊さず閲覧できること
-  - セッション媒体は `httpOnly cookie` 前提とし、`localStorage` / `sessionStorage` にトークンを保存しないこと
+  - `User`, `Community`, `Membership`, `Post`, `Comment`, `Reaction`, `Notification` の永続化モデルを導入すること
+  - UI から DB へ直接触れず、Route Handler + Service Layer の境界を成立させること
+  - ローカル開発と AWS 本番で秘密情報の扱いを分離し、`NEXT_PUBLIC_*` に秘密情報を出さないこと
 - Minimum output expected from Claude:
-  - 保護ルートの実装
-  - ログイン導線またはログイン画面の追加
-  - `src/__tests__/auth-guard.integration.test.tsx` を中心とした AC 対応テスト
+  - コア永続化モデルと migration
+  - Route Handler / Service Layer の最小骨格
+  - `story-0018` の AC に対応する設計/統合テスト
   - Story Status を `Implemented` に上げられる状態
 - Stop conditions:
   - AC を満たせない追加仕様が必要になった場合
-  - Cognito 前提で新たな設計判断が必要になり ADR 修正が要る場合
-  - `story-0018` 以降を先に変更しないと進められない根拠が出た場合
+  - Aurora PostgreSQL / Route Handler 境界で新たな設計判断が必要になり ADR 修正が要る場合
+  - `story-0006` 以降を先に変更しないと進められない根拠が出た場合
 
 ## Sequential Rule
-- `story-0005` 完了前に `story-0018` 以降へ進まない
+- `story-0018` 完了前に `story-0006` 以降へ進まない
 - 以後も同様に、次のStoryは直前Storyの実装とレビューが終わるまで開始しない
 
 ## Notes

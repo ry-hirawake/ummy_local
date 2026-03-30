@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { AppLayout } from "@/components/AppLayout";
+import { AuthProvider } from "@/components/auth/AuthContext";
+import { getSession } from "@/lib/auth/session";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff2",
@@ -20,17 +22,25 @@ export const metadata: Metadata = {
   description: "Ummy - Social collaboration platform",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getSession();
+
   return (
     <html lang="ja">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AppLayout>{children}</AppLayout>
+        {session ? (
+          <AuthProvider user={session.user}>
+            <AppLayout>{children}</AppLayout>
+          </AuthProvider>
+        ) : (
+          children
+        )}
       </body>
     </html>
   );

@@ -11,7 +11,9 @@ import {
   Bell,
   Plus,
   Hash,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthContext";
 
 const communities = [
   { id: "1", name: "全社アナウンス", icon: "📢", members: 245 },
@@ -24,6 +26,12 @@ const communities = [
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  async function handleLogout(): Promise<void> {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/login";
+  }
 
   const isHome = pathname === "/";
   const currentCommunityId = pathname.startsWith("/community/")
@@ -87,13 +95,23 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 className="h-9 w-9 cursor-pointer overflow-hidden rounded-full border-2 border-primary/20"
               >
                 <Image
-                  src="https://images.unsplash.com/photo-1689600944138-da3b150d9cb8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHByb2Zlc3Npb25hbCUyMGhlYWRzaG90fGVufDF8fHx8MTc3MjM4MDMxMnww&ixlib=rb-4.1.0&q=80&w=1080"
-                  alt="Profile"
+                  src={user.avatar}
+                  alt={user.name}
                   width={36}
                   height={36}
                   className="h-full w-full object-cover"
                 />
               </motion.div>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleLogout}
+                className="rounded-lg bg-secondary p-2 transition-all hover:bg-muted"
+                title="ログアウト"
+              >
+                <LogOut className="h-5 w-5" />
+              </motion.button>
             </div>
           </div>
         </div>

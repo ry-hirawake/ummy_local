@@ -7,7 +7,7 @@
 - 認証方式は ADR-0001 に従い Cognito + PKCE + `httpOnly cookie` を前提とし、この Story では最小の認証ガード仕様を固定する
 
 ## Status
-Accepted
+Done
 
 ## Goal
 - `FR-9` と `BC-2` を満たす最小の認証ガードを導入し、「社内専用・認証必須」というプロダクト前提を UI とルーティング上で成立させる
