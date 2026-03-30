@@ -45,33 +45,35 @@ Accepted
     - コメント/リアクションを前提に通知を成立させる
 14. `story-0017`
     - 管理者のピン留めで運用性を上げる
-15. `story-0019`
+15. `story-0020`
+    - Aurora PostgreSQL 実装と Secrets 経路を加え、本番永続化を成立させる
+16. `story-0019`
     - AWS本番デプロイ、監視、運用手順を仕上げる
 
 ## Implementation Start Memo
 - Current target:
-  - Claude は [story-0018.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0018.md) から着手する
+  - Claude は [story-0006.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0006.md) から着手する
 - Read first:
+  - [story-0006.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0006.md)
   - [story-0018.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0018.md)
-  - [adr-0003.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/03_design/adrs/adr-0003.md)
   - [REQUIREMENTS.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/01_requirements/REQUIREMENTS.md)
   - [CONSTRAINTS.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/01_requirements/CONSTRAINTS.md)
 - Implementation objective:
-  - `User`, `Community`, `Membership`, `Post`, `Comment`, `Reaction`, `Notification` の永続化モデルを導入すること
-  - UI から DB へ直接触れず、Route Handler + Service Layer の境界を成立させること
-  - ローカル開発と AWS 本番で秘密情報の扱いを分離し、`NEXT_PUBLIC_*` に秘密情報を出さないこと
+  - `/communities` の一覧導線を成立させること
+  - 公開コミュニティの一覧表示、詳細遷移、空/エラー状態を実装すること
+  - `story-0018` の API / Service 境界を利用して UI 側から直接 DB へ触れないこと
 - Minimum output expected from Claude:
-  - コア永続化モデルと migration
-  - Route Handler / Service Layer の最小骨格
-  - `story-0018` の AC に対応する設計/統合テスト
+  - コミュニティ一覧画面またはルート
+  - 一覧表示・遷移・空/エラー状態の統合テスト
+  - `story-0006` の AC を満たす UI 実装
   - Story Status を `Implemented` に上げられる状態
 - Stop conditions:
   - AC を満たせない追加仕様が必要になった場合
-  - Aurora PostgreSQL / Route Handler 境界で新たな設計判断が必要になり ADR 修正が要る場合
-  - `story-0006` 以降を先に変更しないと進められない根拠が出た場合
+  - コミュニティ一覧ルート定義や公開範囲で新たな設計判断が必要になり Story 修正が要る場合
+  - `story-0007` 以降を先に変更しないと進められない根拠が出た場合
 
 ## Sequential Rule
-- `story-0018` 完了前に `story-0006` 以降へ進まない
+- `story-0006` 完了前に `story-0007` 以降へ進まない
 - 以後も同様に、次のStoryは直前Storyの実装とレビューが終わるまで開始しない
 
 ## Notes

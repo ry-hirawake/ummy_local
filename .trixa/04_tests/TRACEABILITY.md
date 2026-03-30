@@ -155,13 +155,22 @@ Story単位の対応表に加え、プロジェクト全体で「要件/ACがテ
 | AC-2 | `src/__tests__/pinned-posts.integration.test.tsx` | `PinnedPosts / Unpin` | ピン留め解除 |
 | AC-3 | `src/__tests__/pinned-posts.integration.test.tsx` | `PinnedPosts / Permissions` | 権限制御 |
 
-### Story-0018: AWS本番とローカル開発で共通利用できるAPI・永続化基盤を整える
+### Story-0018: ローカル開発で利用可能なAPI・永続化抽象基盤を整える
 
-| AC | Verification | Location | Notes |
+| AC | Test File | Test Suite | Notes |
 |---|---|---|---|
-| AC-1 | モデル/設計検証 | ADR / 設計文書 / 型定義 | コアエンティティ |
-| AC-2 | API責務検証 | Route Handlers / services / tests | API境界 |
-| AC-3 | 設定検証 | 環境設定、README、デプロイ文書 | 環境整合 |
+| AC-1 | `src/__tests__/api-foundation.integration.test.ts` | `AC-1: Core entity type definitions` | 7エンティティの型定義・関連を検証 |
+| AC-2 | `src/__tests__/api-foundation.integration.test.ts` | `AC-2: Service layer and data access` | Service経由CRUD、認証要件、エンリッチメント |
+| AC-3 | `src/__tests__/api-foundation.integration.test.ts` | `AC-3: Environment configuration` | デフォルトin-memory、provider切替契約、seed動作 |
+
+### Story-0020: Aurora PostgreSQL 実装と AWS シークレット経路を整える
+
+| AC | Test File | Test Suite | Notes |
+|---|---|---|---|
+| AC-1 | `src/__tests__/postgres-foundation.integration.test.ts` | `PostgresFoundation / RepositoryFactory` | postgres provider 初期化と repository 実装選択 |
+| AC-2 | `src/__tests__/postgres-foundation.integration.test.ts` | `PostgresFoundation / Migrations` | schema 適用と主要制約 |
+| AC-3 | `src/__tests__/postgres-foundation.integration.test.ts` | `PostgresFoundation / SecretsAndConfig` | ローカル設定と Secrets Manager 前提 |
+| AC-4 | `src/__tests__/postgres-foundation.integration.test.ts` | `PostgresFoundation / ProviderParity` | in-memory と postgres の API 契約整合 |
 
 ### Story-0019: AWS本番環境へデプロイし監視できる
 

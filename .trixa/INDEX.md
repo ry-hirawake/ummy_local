@@ -53,6 +53,7 @@
 - story-0017: ./02_specs/stories/story-0017.md
 - story-0018: ./02_specs/stories/story-0018.md
 - story-0019: ./02_specs/stories/story-0019.md
+- story-0020: ./02_specs/stories/story-0020.md
 
 ---
 

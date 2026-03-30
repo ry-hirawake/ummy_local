@@ -62,7 +62,7 @@ And 障害調査に必要なログが残る
 - RQ-2: 解消済み。インフラ定義は IaC で管理し、デプロイ実行は AWS CLI ベースの手順として標準化する
 
 ## Dependencies
-- Related: Story-0005, Story-0018, NFR-2, NFR-7
+- Related: Story-0005, Story-0018, Story-0020, NFR-2, NFR-7
 - External: AWS
 
 ## Links
