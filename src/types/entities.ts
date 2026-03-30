@@ -31,6 +31,7 @@ export interface UserEntity {
 export interface CommunityEntity {
   id: string;
   name: string;
+  slug: string;
   icon: string;
   description: string;
   createdAt: Date;
@@ -95,6 +96,7 @@ export interface CreateUserInput {
 
 export interface CreateCommunityInput {
   name: string;
+  slug: string;
   icon: string;
   description: string;
 }

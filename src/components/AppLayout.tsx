@@ -158,13 +158,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               コミュニティ
             </h3>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="text-muted-foreground transition-colors hover:text-primary"
-            >
-              <Plus className="h-4 w-4" />
-            </motion.button>
+            <Link href="/communities">
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="text-muted-foreground transition-colors hover:text-primary"
+              >
+                <Plus className="h-4 w-4" />
+              </motion.div>
+            </Link>
           </div>
           <div className="space-y-1">
             {communities.map((community, index) => (

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { Hash, RefreshCw } from "lucide-react";
-import { CommunityCard } from "@/components/community";
+import { Hash, RefreshCw, Plus } from "lucide-react";
+import { CommunityCard, CommunityCreateDialog } from "@/components/community";
 
 interface CommunityItem {
   id: string;
@@ -14,9 +15,14 @@ interface CommunityItem {
 }
 
 export default function CommunitiesPage(): React.ReactElement {
+  const router = useRouter();
   const [communities, setCommunities] = useState<CommunityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   async function fetchCommunities(): Promise<void> {
     setLoading(true);
@@ -43,6 +49,37 @@ export default function CommunitiesPage(): React.ReactElement {
     void fetchCommunities();
   }, []);
 
+  async function handleCreate(data: {
+    name: string;
+    icon: string;
+    description: string;
+  }): Promise<void> {
+    setSubmitting(true);
+    setCreateError(null);
+    try {
+      const res = await fetch("/api/communities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const body: { error?: string } = await res.json();
+        throw new Error(body.error ?? "コミュニティの作成に失敗しました");
+      }
+      const body: { community: { id: string } } = await res.json();
+      setDialogOpen(false);
+      router.push(`/community/${body.community.id}`);
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "コミュニティの作成に失敗しました";
+      setCreateError(message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-4xl p-6">
       <motion.div
@@ -50,9 +87,21 @@ export default function CommunitiesPage(): React.ReactElement {
         animate={{ y: 0, opacity: 1 }}
         className="mb-8"
       >
-        <div className="flex items-center gap-3">
-          <Hash className="h-7 w-7 text-primary" />
-          <h1 className="text-2xl font-bold">コミュニティを見つける</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Hash className="h-7 w-7 text-primary" />
+            <h1 className="text-2xl font-bold">コミュニティを見つける</h1>
+          </div>
+          <button
+            onClick={() => {
+              setCreateError(null);
+              setDialogOpen(true);
+            }}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            <Plus className="h-4 w-4" />
+            コミュニティを作成
+          </button>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           興味のあるコミュニティに参加して、仲間とつながりましょう
@@ -134,6 +183,14 @@ export default function CommunitiesPage(): React.ReactElement {
           ))}
         </motion.div>
       )}
+
+      <CommunityCreateDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onSubmit={(data) => void handleCreate(data)}
+        submitting={submitting}
+        error={createError}
+      />
     </div>
   );
 }

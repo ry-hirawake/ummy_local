@@ -78,11 +78,11 @@ export function seedRepositories(repos: SeedableRepositories): void {
 
   // --- Communities (aligned with community-data.ts) ---
   const communities: CommunityEntity[] = [
-    { id: "community-1", name: "全社アナウンス", icon: "📢", description: "会社からの重要なお知らせや全社に関わる情報を共有するコミュニティです", createdAt: hoursAgo(720), updatedAt: hoursAgo(720) },
-    { id: "community-2", name: "エンジニアリング", icon: "💻", description: "技術的な議論、コードレビュー、新しい技術の共有を行うエンジニアのためのコミュニティ", createdAt: hoursAgo(720), updatedAt: hoursAgo(720) },
-    { id: "community-3", name: "デザイン", icon: "🎨", description: "デザインのアイデア、フィードバック、トレンドを共有するクリエイティブなスペース", createdAt: hoursAgo(720), updatedAt: hoursAgo(720) },
-    { id: "community-4", name: "マーケティング", icon: "📊", description: "マーケティング戦略、キャンペーン結果、市場分析を共有するコミュニティ", createdAt: hoursAgo(720), updatedAt: hoursAgo(720) },
-    { id: "community-5", name: "雑談", icon: "☕", description: "リラックスした雰囲気で自由に会話を楽しむカジュアルなコミュニティ", createdAt: hoursAgo(720), updatedAt: hoursAgo(720) },
+    { id: "community-1", name: "全社アナウンス", slug: "全社アナウンス", icon: "📢", description: "会社からの重要なお知らせや全社に関わる情報を共有するコミュニティです", createdAt: hoursAgo(720), updatedAt: hoursAgo(720) },
+    { id: "community-2", name: "エンジニアリング", slug: "エンジニアリング", icon: "💻", description: "技術的な議論、コードレビュー、新しい技術の共有を行うエンジニアのためのコミュニティ", createdAt: hoursAgo(720), updatedAt: hoursAgo(720) },
+    { id: "community-3", name: "デザイン", slug: "デザイン", icon: "🎨", description: "デザインのアイデア、フィードバック、トレンドを共有するクリエイティブなスペース", createdAt: hoursAgo(720), updatedAt: hoursAgo(720) },
+    { id: "community-4", name: "マーケティング", slug: "マーケティング", icon: "📊", description: "マーケティング戦略、キャンペーン結果、市場分析を共有するコミュニティ", createdAt: hoursAgo(720), updatedAt: hoursAgo(720) },
+    { id: "community-5", name: "雑談", slug: "雑談", icon: "☕", description: "リラックスした雰囲気で自由に会話を楽しむカジュアルなコミュニティ", createdAt: hoursAgo(720), updatedAt: hoursAgo(720) },
   ];
   communities.forEach((c) => repos.communities.seed(c));
 

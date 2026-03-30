@@ -52,28 +52,28 @@ Accepted
 
 ## Implementation Start Memo
 - Current target:
-  - Claude は [story-0007.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0007.md) から着手する
+  - Claude は [story-0008.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0008.md) から着手する
 - Read first:
-  - [story-0007.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0007.md)
+  - [story-0008.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0008.md)
   - [story-0018.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0018.md)
   - [REQUIREMENTS.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/01_requirements/REQUIREMENTS.md)
   - [CONSTRAINTS.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/01_requirements/CONSTRAINTS.md)
 - Implementation objective:
-  - コミュニティ作成フォームを成立させること
-  - 作成成功時に新規コミュニティ保存と詳細ページ遷移を行うこと
-  - slug 一意制約、必須/任意項目ルールを満たすこと
+  - コミュニティ参加・退出の主導線を成立させること
+  - 参加状態に応じてコミュニティ詳細の表示とメンバー数を更新できること
+  - 後続のコミュニティ投稿権限判定に使える参加状態を整えること
 - Minimum output expected from Claude:
-  - コミュニティ作成画面または導線
-  - 作成成功/バリデーションの統合テスト
-  - `story-0007` の AC を満たす UI 実装
+  - コミュニティ参加/退出の UI と API 接続
+  - `story-0008` の AC を満たす統合テスト
+  - コミュニティ詳細または一覧で参加状態が確認できる実装
   - Story Status を `Implemented` に上げられる状態
 - Stop conditions:
   - AC を満たせない追加仕様が必要になった場合
-  - コミュニティ名 slug 仕様や詳細遷移先で新たな設計判断が必要になり Story 修正が要る場合
-  - `story-0008` 以降を先に変更しないと進められない根拠が出た場合
+  - 参加条件や閲覧条件で新たな設計判断が必要になり Story 修正が要る場合
+  - `story-0009` 以降を先に変更しないと進められない根拠が出た場合
 
 ## Sequential Rule
-- `story-0007` 完了前に `story-0008` 以降へ進まない
+- `story-0008` 完了前に `story-0009` 以降へ進まない
 - 以後も同様に、次のStoryは直前Storyの実装とレビューが終わるまで開始しない
 
 ## Notes

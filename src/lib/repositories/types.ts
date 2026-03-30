@@ -31,6 +31,7 @@ export interface UserRepository {
 
 export interface CommunityRepository {
   findById(id: string): Promise<CommunityEntity | null>;
+  findBySlug(slug: string): Promise<CommunityEntity | null>;
   findAll(): Promise<CommunityEntity[]>;
   create(input: CreateCommunityInput): Promise<CommunityEntity>;
   update(id: string, input: UpdateCommunityInput): Promise<CommunityEntity | null>;

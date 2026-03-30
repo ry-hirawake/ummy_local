@@ -10,21 +10,31 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import fs from "fs";
 import path from "path";
+import { notFound } from "next/navigation";
+import { resetRepositories } from "@/lib/repositories";
+import { getServices, resetServices } from "@/lib/services";
 
-// Mock next/navigation
-const mockNotFound = vi.fn();
-vi.mock("next/navigation", () => ({
-  useParams: () => ({ id: "1" }),
-  notFound: () => mockNotFound(),
-}));
+async function renderCommunityPage(id = "community-1"): Promise<void> {
+  const CommunityPage = (await import("@/app/community/[id]/page")).default;
+  const element = await CommunityPage({
+    params: Promise.resolve({ id }),
+  });
+
+  render(element);
+}
 
 // Feature: Community Feed Architecture (AC-1)
 describe("CommunityFeed / Architecture", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetServices();
+    resetRepositories();
+  });
+
   it("should have community types defined in _data module", async () => {
     const typesPath = path.resolve(__dirname, "../app/community/[id]/_data/types.ts");
     expect(fs.existsSync(typesPath)).toBe(true);
 
-    // Types exist as type exports (checked via successful file existence)
     expect(true).toBe(true);
   });
 
@@ -52,8 +62,11 @@ describe("CommunityFeed / Architecture", () => {
     expect(typeof currentUserAvatar).toBe("string");
   });
 
-  it("should not contain inline type definitions in page component", () => {
-    const pagePath = path.resolve(__dirname, "../app/community/[id]/page.tsx");
+  it("should not contain inline type definitions in client container", () => {
+    const pagePath = path.resolve(
+      __dirname,
+      "../app/community/[id]/CommunityPageClient.tsx"
+    );
     const pageContent = fs.readFileSync(pagePath, "utf-8");
 
     expect(pageContent).not.toMatch(/^interface Comment \{/m);
@@ -64,13 +77,25 @@ describe("CommunityFeed / Architecture", () => {
   });
 
   it("should use Presentational Components", () => {
-    const pagePath = path.resolve(__dirname, "../app/community/[id]/page.tsx");
+    const pagePath = path.resolve(
+      __dirname,
+      "../app/community/[id]/CommunityPageClient.tsx"
+    );
     const pageContent = fs.readFileSync(pagePath, "utf-8");
 
     expect(pageContent).toMatch(/from ".\/_components"/);
     expect(pageContent).toMatch(/<CommunityHeader/);
     expect(pageContent).toMatch(/<CommunityPostCard/);
     expect(pageContent).toMatch(/<CreatePostInput/);
+  });
+
+  it("should resolve community data through service layer in page entry", () => {
+    const pagePath = path.resolve(__dirname, "../app/community/[id]/page.tsx");
+    const pageContent = fs.readFileSync(pagePath, "utf-8");
+
+    expect(pageContent).toMatch(/from "@\/lib\/services"/);
+    expect(pageContent).toMatch(/<CommunityPageClient/);
+    expect(pageContent).toMatch(/notFound\(\)/);
   });
 
   it("should reuse shared reaction icons from lib", () => {
@@ -88,22 +113,22 @@ describe("CommunityFeed / Architecture", () => {
 describe("CommunityFeed / Display", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetServices();
+    resetRepositories();
   });
 
   it("should render community info header", async () => {
-    const CommunityPage = (await import("@/app/community/[id]/page")).default;
-    render(<CommunityPage />);
+    await renderCommunityPage();
 
     expect(screen.getByText("全社アナウンス")).toBeInTheDocument();
-    expect(screen.getByText("245人のメンバー")).toBeInTheDocument();
+    expect(screen.getByText("3人のメンバー")).toBeInTheDocument();
     expect(
       screen.getByText("会社からの重要なお知らせや全社に関わる情報を共有するコミュニティです")
     ).toBeInTheDocument();
   });
 
   it("should render posts with author info and timestamp", async () => {
-    const CommunityPage = (await import("@/app/community/[id]/page")).default;
-    render(<CommunityPage />);
+    await renderCommunityPage();
 
     expect(screen.getByText("田中 美咲")).toBeInTheDocument();
     expect(screen.getByText("マーケティングマネージャー")).toBeInTheDocument();
@@ -111,20 +136,17 @@ describe("CommunityFeed / Display", () => {
   });
 
   it("should display pinned post with indicator at top", async () => {
-    const CommunityPage = (await import("@/app/community/[id]/page")).default;
-    render(<CommunityPage />);
+    await renderCommunityPage();
 
     expect(screen.getByText("ピン留めされた投稿")).toBeInTheDocument();
 
-    // Pinned post should be first
     const articles = screen.getAllByRole("article");
     expect(articles[0]).toHaveTextContent("ピン留めされた投稿");
     expect(articles[0]).toHaveTextContent("田中 美咲");
   });
 
   it("should render posts in mock data order", async () => {
-    const CommunityPage = (await import("@/app/community/[id]/page")).default;
-    render(<CommunityPage />);
+    await renderCommunityPage();
 
     const articles = screen.getAllByRole("article");
     expect(articles.length).toBe(3);
@@ -132,17 +154,41 @@ describe("CommunityFeed / Display", () => {
     expect(articles[1]).toHaveTextContent("佐藤 健太");
     expect(articles[2]).toHaveTextContent("鈴木 愛");
   });
+
+  it("should render a newly created community by generated id", async () => {
+    const services = getServices();
+    const result = await services.communities.create(
+      {
+        name: "SRE",
+        icon: "🛠️",
+        description: "運用と信頼性を扱うコミュニティ",
+      },
+      "user-1"
+    );
+
+    expect(result.success).toBe(true);
+    if (!result.success) {
+      return;
+    }
+
+    await renderCommunityPage(result.data.id);
+
+    expect(screen.getByText("SRE")).toBeInTheDocument();
+    expect(screen.getByText("1人のメンバー")).toBeInTheDocument();
+    expect(screen.getByText("運用と信頼性を扱うコミュニティ")).toBeInTheDocument();
+  });
 });
 
 // Feature: Reactions and Comments Interactions (AC-3)
 describe("CommunityFeed / Interactions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetServices();
+    resetRepositories();
   });
 
   it("should show reaction popup when button is clicked", async () => {
-    const CommunityPage = (await import("@/app/community/[id]/page")).default;
-    render(<CommunityPage />);
+    await renderCommunityPage();
 
     const reactionButtons = screen.getAllByText("リアクション");
     fireEvent.click(reactionButtons[0]);
@@ -154,8 +200,7 @@ describe("CommunityFeed / Interactions", () => {
   });
 
   it("should update display when reaction is selected", async () => {
-    const CommunityPage = (await import("@/app/community/[id]/page")).default;
-    render(<CommunityPage />);
+    await renderCommunityPage();
 
     const reactionButtons = screen.getAllByText("リアクション");
     fireEvent.click(reactionButtons[0]);
@@ -167,8 +212,7 @@ describe("CommunityFeed / Interactions", () => {
   });
 
   it("should close popup after reaction selection", async () => {
-    const CommunityPage = (await import("@/app/community/[id]/page")).default;
-    render(<CommunityPage />);
+    await renderCommunityPage();
 
     const reactionButtons = screen.getAllByText("リアクション");
     fireEvent.click(reactionButtons[0]);
@@ -178,21 +222,17 @@ describe("CommunityFeed / Interactions", () => {
     const likeButton = screen.getByTitle("いいね");
     fireEvent.click(likeButton);
 
-    // Popup should be closed
     expect(screen.queryByTitle("祝福")).not.toBeInTheDocument();
   });
 
   it("should display pre-existing user reaction", async () => {
-    const CommunityPage = (await import("@/app/community/[id]/page")).default;
-    render(<CommunityPage />);
+    await renderCommunityPage();
 
-    // Post 2 has userReaction: "lightbulb"
     expect(screen.getByText("ひらめき")).toBeInTheDocument();
   });
 
   it("should expand comments when button is clicked", async () => {
-    const CommunityPage = (await import("@/app/community/[id]/page")).default;
-    render(<CommunityPage />);
+    await renderCommunityPage();
 
     expect(
       screen.queryByText("Zoomリンクはいつ頃共有される予定でしょうか？カレンダーに登録しておきたいです。")
@@ -207,8 +247,7 @@ describe("CommunityFeed / Interactions", () => {
   });
 
   it("should show reply input when reply button is clicked", async () => {
-    const CommunityPage = (await import("@/app/community/[id]/page")).default;
-    render(<CommunityPage />);
+    await renderCommunityPage();
 
     const commentButtons = screen.getAllByText("コメント");
     fireEvent.click(commentButtons[0]);
@@ -220,8 +259,7 @@ describe("CommunityFeed / Interactions", () => {
   });
 
   it("should toggle reply input off when clicked again", async () => {
-    const CommunityPage = (await import("@/app/community/[id]/page")).default;
-    render(<CommunityPage />);
+    await renderCommunityPage();
 
     const commentButtons = screen.getAllByText("コメント");
     fireEvent.click(commentButtons[0]);
@@ -237,27 +275,28 @@ describe("CommunityFeed / Interactions", () => {
 
 // Feature: Invalid Community ID Handling (AC-4)
 describe("CommunityFeed / InvalidCommunity", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    resetServices();
+    resetRepositories();
+  });
+
   it("should have not-found.tsx file", () => {
     const notFoundPath = path.resolve(__dirname, "../app/community/[id]/not-found.tsx");
     expect(fs.existsSync(notFoundPath)).toBe(true);
   });
 
   it("should call notFound for invalid community ID", async () => {
-    // Reset and re-mock with invalid ID - notFound() throws in real Next.js
-    vi.resetModules();
-    const mockNotFoundThrow = vi.fn(() => {
+    vi.mocked(notFound).mockImplementation(() => {
       throw new Error("NEXT_NOT_FOUND");
     });
-    vi.doMock("next/navigation", () => ({
-      useParams: () => ({ id: "999" }),
-      notFound: mockNotFoundThrow,
-    }));
 
-    const { default: CommunityPage } = await import("@/app/community/[id]/page");
+    const CommunityPage = (await import("@/app/community/[id]/page")).default;
 
-    // In Next.js, notFound() throws to trigger the not-found UI
-    expect(() => render(<CommunityPage />)).toThrow("NEXT_NOT_FOUND");
-    expect(mockNotFoundThrow).toHaveBeenCalled();
+    await expect(
+      CommunityPage({ params: Promise.resolve({ id: "community-999" }) })
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+    expect(notFound).toHaveBeenCalled();
   });
 
   it("should use notFound() from next/navigation in page", () => {
@@ -273,6 +312,16 @@ describe("CommunityFeed / InvalidCommunity", () => {
 describe("CommunityFeed / ImageOptimization", () => {
   it("should not use img tags in page component", () => {
     const pagePath = path.resolve(__dirname, "../app/community/[id]/page.tsx");
+    const pageContent = fs.readFileSync(pagePath, "utf-8");
+
+    expect(pageContent).not.toMatch(/<img\s/);
+  });
+
+  it("should not use img tags in client container", () => {
+    const pagePath = path.resolve(
+      __dirname,
+      "../app/community/[id]/CommunityPageClient.tsx"
+    );
     const pageContent = fs.readFileSync(pagePath, "utf-8");
 
     expect(pageContent).not.toMatch(/<img\s/);

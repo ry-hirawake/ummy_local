@@ -9,6 +9,13 @@ export class InMemoryCommunityRepository implements CommunityRepository {
     return this.communities.get(id) ?? null;
   }
 
+  async findBySlug(slug: string): Promise<CommunityEntity | null> {
+    for (const community of this.communities.values()) {
+      if (community.slug === slug) return community;
+    }
+    return null;
+  }
+
   async findAll(): Promise<CommunityEntity[]> {
     return Array.from(this.communities.values());
   }

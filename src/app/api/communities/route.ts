@@ -49,7 +49,12 @@ export async function POST(request: Request): Promise<NextResponse> {
     );
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error.message }, { status: 500 });
+      const statusMap: Record<string, number> = {
+        VALIDATION: 400,
+        CONFLICT: 409,
+      };
+      const status = statusMap[result.error.code] ?? 500;
+      return NextResponse.json({ error: result.error.message }, { status });
     }
 
     return NextResponse.json({ community: result.data }, { status: 201 });
