@@ -30,6 +30,7 @@
 
 ## 02 Specs
 - Story Template: ./02_specs/_template-story.md
+- Delivery Plan: ./02_specs/DELIVERY_PLAN.md
 - Stories Directory: ./02_specs/stories/
 
 ### Active Stories (maintain manually)
@@ -37,6 +38,21 @@
 - story-0002: ./02_specs/stories/story-0002.md
 - story-0003: ./02_specs/stories/story-0003.md
 - story-0004: ./02_specs/stories/story-0004.md
+- story-0005: ./02_specs/stories/story-0005.md
+- story-0006: ./02_specs/stories/story-0006.md
+- story-0007: ./02_specs/stories/story-0007.md
+- story-0008: ./02_specs/stories/story-0008.md
+- story-0009: ./02_specs/stories/story-0009.md
+- story-0010: ./02_specs/stories/story-0010.md
+- story-0011: ./02_specs/stories/story-0011.md
+- story-0012: ./02_specs/stories/story-0012.md
+- story-0013: ./02_specs/stories/story-0013.md
+- story-0014: ./02_specs/stories/story-0014.md
+- story-0015: ./02_specs/stories/story-0015.md
+- story-0016: ./02_specs/stories/story-0016.md
+- story-0017: ./02_specs/stories/story-0017.md
+- story-0018: ./02_specs/stories/story-0018.md
+- story-0019: ./02_specs/stories/story-0019.md
 
 ---
 
@@ -45,7 +61,10 @@
 - ADRs Directory: ./03_design/adrs/
 
 ### Key ADRs (maintain manually)
-- なし（2026-03-27時点）
+- adr-0001: ./03_design/adrs/adr-0001.md
+- adr-0002: ./03_design/adrs/adr-0002.md
+- adr-0003: ./03_design/adrs/adr-0003.md
+- adr-0004: ./03_design/adrs/adr-0004.md
 
 ---
 
