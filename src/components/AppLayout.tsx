@@ -204,14 +204,20 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           transition={{ delay: 0.5 }}
           className="mt-6"
         >
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm font-medium transition-all hover:border-primary hover:bg-background"
-          >
-            <Hash className="mr-2 inline-block h-4 w-4" />
-            コミュニティを見つける
-          </motion.button>
+          <Link href="/communities">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={`w-full rounded-lg border px-4 py-2.5 text-center text-sm font-medium transition-all ${
+                pathname === "/communities"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-secondary hover:border-primary hover:bg-background"
+              }`}
+            >
+              <Hash className="mr-2 inline-block h-4 w-4" />
+              コミュニティを見つける
+            </motion.div>
+          </Link>
         </motion.div>
       </motion.aside>
 

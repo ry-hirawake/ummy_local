@@ -52,28 +52,28 @@ Accepted
 
 ## Implementation Start Memo
 - Current target:
-  - Claude は [story-0006.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0006.md) から着手する
+  - Claude は [story-0007.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0007.md) から着手する
 - Read first:
-  - [story-0006.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0006.md)
+  - [story-0007.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0007.md)
   - [story-0018.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0018.md)
   - [REQUIREMENTS.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/01_requirements/REQUIREMENTS.md)
   - [CONSTRAINTS.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/01_requirements/CONSTRAINTS.md)
 - Implementation objective:
-  - `/communities` の一覧導線を成立させること
-  - 公開コミュニティの一覧表示、詳細遷移、空/エラー状態を実装すること
-  - `story-0018` の API / Service 境界を利用して UI 側から直接 DB へ触れないこと
+  - コミュニティ作成フォームを成立させること
+  - 作成成功時に新規コミュニティ保存と詳細ページ遷移を行うこと
+  - slug 一意制約、必須/任意項目ルールを満たすこと
 - Minimum output expected from Claude:
-  - コミュニティ一覧画面またはルート
-  - 一覧表示・遷移・空/エラー状態の統合テスト
-  - `story-0006` の AC を満たす UI 実装
+  - コミュニティ作成画面または導線
+  - 作成成功/バリデーションの統合テスト
+  - `story-0007` の AC を満たす UI 実装
   - Story Status を `Implemented` に上げられる状態
 - Stop conditions:
   - AC を満たせない追加仕様が必要になった場合
-  - コミュニティ一覧ルート定義や公開範囲で新たな設計判断が必要になり Story 修正が要る場合
-  - `story-0007` 以降を先に変更しないと進められない根拠が出た場合
+  - コミュニティ名 slug 仕様や詳細遷移先で新たな設計判断が必要になり Story 修正が要る場合
+  - `story-0008` 以降を先に変更しないと進められない根拠が出た場合
 
 ## Sequential Rule
-- `story-0006` 完了前に `story-0007` 以降へ進まない
+- `story-0007` 完了前に `story-0008` 以降へ進まない
 - 以後も同様に、次のStoryは直前Storyの実装とレビューが終わるまで開始しない
 
 ## Notes

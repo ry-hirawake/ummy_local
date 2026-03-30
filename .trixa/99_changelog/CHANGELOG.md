@@ -20,3 +20,4 @@
 - 2026-03-30 Story-0005: 認証ガード実装完了（middleware.ts ルート保護、mock auth provider、httpOnly cookie セッション、ログイン画面、ログアウト、AuthContext、テスト17件追加） / Impact: 未認証アクセス遮断、FR-9.1/BC-2準拠、将来Cognito差替え可能な抽象化
 - 2026-03-31 Story-0018: API・永続化基盤実装完了（7エンティティ型定義、Repository抽象+in-memory実装、Service層6サービス、Route Handler 10エンドポイント、環境設定factory、seed data、テスト27件追加） / Impact: 後続Story（0006〜0017）がモック依存なしにAPI/Service経由で実装可能に
 - 2026-03-31 Story-0018/0020: 永続化基盤を骨格Storyと本番永続化Storyに再分割 / Impact: `story-0018` は Done 判定可能になり、Aurora/PostgreSQL 実装は `story-0020` へ分離
+- 2026-03-31 Story-0006: コミュニティ一覧ページ実装完了（CommunityCard Presentational Component、/communities Container Page、AppLayout「コミュニティを見つける」Link化、テスト7件追加） / Impact: FR-1.3/FR-1.5準拠、GET /api/communities経由で一覧表示・詳細遷移・空/エラー状態対応

@@ -7,7 +7,7 @@
 - 初期フェーズでは公開コミュニティのみを扱う
 
 ## Status
-Accepted
+Done
 
 ## Goal
 - `FR-1.3` と `FR-1.5` を満たすコミュニティディレクトリを成立させ、ユーザーが参加先や閲覧先を発見できるようにする
@@ -53,11 +53,15 @@ And 無言で空白画面にしない
 - EC-3: 認証前アクセスは Story-0005 の認証ガードを優先する
 
 ## Test Mapping
-| AC | Test Suite | File |
-|---|---|---|
-| AC-1 | `CommunityDirectory / Display` | `src/__tests__/community-directory.integration.test.tsx` |
-| AC-2 | `CommunityDirectory / Navigation` | `src/__tests__/community-directory.integration.test.tsx` |
-| AC-3 | `CommunityDirectory / EmptyAndError` | `src/__tests__/community-directory.integration.test.tsx` |
+| AC | Test Suite | Test Name | File |
+|---|---|---|---|
+| AC-1 | `CommunityDirectory / Display` | `should display community name, icon, description, and member count` | `src/__tests__/community-directory.integration.test.tsx` |
+| AC-1 | `CommunityDirectory / Display` | `should show skeleton loading state initially` | `src/__tests__/community-directory.integration.test.tsx` |
+| AC-2 | `CommunityDirectory / Navigation` | `should have links to /community/{id} for each community` | `src/__tests__/community-directory.integration.test.tsx` |
+| AC-3 | `CommunityDirectory / EmptyAndError` | `should display empty state when no communities exist` | `src/__tests__/community-directory.integration.test.tsx` |
+| AC-3 | `CommunityDirectory / EmptyAndError` | `should display error message and retry button when fetch fails` | `src/__tests__/community-directory.integration.test.tsx` |
+| AC-3 | `CommunityDirectory / EmptyAndError` | `should retry fetch when retry button is clicked` | `src/__tests__/community-directory.integration.test.tsx` |
+| AC-3 | `CommunityDirectory / EmptyAndError` | `should display error when network request throws` | `src/__tests__/community-directory.integration.test.tsx` |
 
 ## Research Questions (if needed)
 - RQ-1: 解消済み。コミュニティ一覧は `/communities` の独立ルートを正とし、既存サイドバーは同一覧へのショートカット/抜粋として併設する
