@@ -7,7 +7,7 @@
 - コミュニティ投稿の更新がホームに反映される
 
 ## Status
-Accepted
+Done
 
 ## Goal
 - 更新後の `FR-2.3`, `FR-2.5` とホームフィード定義を満たし、Ummy の横断閲覧入口を本機能として成立させる
@@ -51,9 +51,9 @@ And 投稿するにはコミュニティへ移動する必要がある
 ## Test Mapping
 | AC | Test Suite | File |
 |---|---|---|
-| AC-1 | `HomeFeed / AggregationDisplay` | `src/__tests__/home-feed.integration.test.tsx` |
-| AC-2 | `HomeFeed / AggregationRefresh` | `src/__tests__/home-feed.integration.test.tsx` |
-| AC-3 | `HomeFeed / PostingRestriction` | `src/__tests__/home-feed.integration.test.tsx` |
+| AC-1 | `HomeFeed / AggregationDisplay` | `src/__tests__/home-feed.integration.test.tsx` (4 tests) |
+| AC-2 | `HomeFeed / AggregationRefresh` | `src/__tests__/home-feed.integration.test.tsx` (2 tests) |
+| AC-3 | `HomeFeed / PostingRestriction` | `src/__tests__/home-feed.integration.test.tsx` (3 tests) |
 
 ## Research Questions (if needed)
 - RQ-1: 解消済み。ホームフィードは認証済みユーザーが閲覧可能な全公開コミュニティ投稿を対象とし、参加中コミュニティへの限定は初期フェーズで行わない

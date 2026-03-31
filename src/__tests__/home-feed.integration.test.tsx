@@ -4,6 +4,7 @@
  *
  * Story Mapping (tracked in SSOT):
  * - Story-0001: AC-1 to AC-5
+ * - Story-0010: AC-1 (AggregationDisplay), AC-2 (AggregationRefresh), AC-3 (PostingRestriction)
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
@@ -363,5 +364,265 @@ describe("HomeFeed / LoadingAndError", () => {
     });
 
     expect(screen.getByText("再試行")).toBeInTheDocument();
+  });
+});
+
+// Story-0010: AC-1 Aggregation Display
+describe("HomeFeed / AggregationDisplay", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("should display posts from multiple communities", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: mockApiPosts }),
+      })
+    );
+
+    const Home = (await import("@/app/page")).default;
+    render(<Home />);
+
+    // AC-1: Posts from different communities are displayed
+    await waitFor(() => {
+      expect(screen.getByText("📊 マーケティング")).toBeInTheDocument();
+    });
+    expect(screen.getByText("💻 エンジニアリング")).toBeInTheDocument();
+    expect(screen.getByText("🎨 デザイン")).toBeInTheDocument();
+  });
+
+  it("should show community name for each post", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: mockApiPosts }),
+      })
+    );
+
+    const Home = (await import("@/app/page")).default;
+    render(<Home />);
+
+    await waitFor(() => {
+      expect(screen.getByText("田中 美咲")).toBeInTheDocument();
+    });
+
+    // AC-1: Each post shows its community label
+    const articles = screen.getAllByRole("article");
+    expect(articles[0]).toHaveTextContent("📊 マーケティング");
+    expect(articles[1]).toHaveTextContent("💻 エンジニアリング");
+    expect(articles[2]).toHaveTextContent("🎨 デザイン");
+  });
+
+  it("should display posts in chronological order (newest first)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: mockApiPosts }),
+      })
+    );
+
+    const Home = (await import("@/app/page")).default;
+    render(<Home />);
+
+    await waitFor(() => {
+      expect(screen.getByText("田中 美咲")).toBeInTheDocument();
+    });
+
+    // AC-1: Posts are ordered by time (API returns in order)
+    const articles = screen.getAllByRole("article");
+    expect(articles[0]).toHaveTextContent("2時間前"); // Most recent
+    expect(articles[1]).toHaveTextContent("4時間前");
+    expect(articles[2]).toHaveTextContent("6時間前"); // Oldest
+  });
+
+  it("should show empty state when no posts exist", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: [] }),
+      })
+    );
+
+    const Home = (await import("@/app/page")).default;
+    render(<Home />);
+
+    // EC-1: Empty state is displayed
+    await waitFor(() => {
+      expect(
+        screen.getByText("まだ投稿がありません。コミュニティに参加して投稿してみましょう！")
+      ).toBeInTheDocument();
+    });
+  });
+});
+
+// Story-0010: AC-2 Aggregation Refresh
+describe("HomeFeed / AggregationRefresh", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("should reflect new posts when retry button is clicked after error", async () => {
+    const newPost = {
+      id: "4",
+      content: "新しい投稿です！",
+      createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+      author: {
+        id: "u4",
+        name: "山田 太郎",
+        role: "エンジニア",
+        avatar: "https://example.com/avatar4.jpg",
+      },
+      reactions: { thumbsUp: 5, partyPopper: 2, lightbulb: 1, laugh: 0 },
+      commentCount: 3,
+      community: { name: "エンジニアリング", icon: "💻" },
+    };
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 500 })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ posts: [newPost, ...mockApiPosts] }),
+      });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const Home = (await import("@/app/page")).default;
+    render(<Home />);
+
+    // First load fails
+    await waitFor(() => {
+      expect(screen.getByText("投稿の取得に失敗しました")).toBeInTheDocument();
+    });
+
+    // AC-2: Click retry to refresh
+    fireEvent.click(screen.getByText("再試行"));
+
+    // AC-2: New post is reflected
+    await waitFor(() => {
+      expect(screen.getByText("山田 太郎")).toBeInTheDocument();
+    });
+    expect(screen.getByText("新しい投稿です！")).toBeInTheDocument();
+  });
+
+  it("should maintain community labels and order after refresh", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 500 })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ posts: mockApiPosts }),
+      });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const Home = (await import("@/app/page")).default;
+    render(<Home />);
+
+    await waitFor(() => {
+      expect(screen.getByText("投稿の取得に失敗しました")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText("再試行"));
+
+    // AC-2: Community labels and chronological order are maintained
+    await waitFor(() => {
+      expect(screen.getByText("田中 美咲")).toBeInTheDocument();
+    });
+
+    const articles = screen.getAllByRole("article");
+    expect(articles[0]).toHaveTextContent("📊 マーケティング");
+    expect(articles[0]).toHaveTextContent("2時間前");
+    expect(articles[1]).toHaveTextContent("💻 エンジニアリング");
+    expect(articles[2]).toHaveTextContent("🎨 デザイン");
+  });
+});
+
+// Story-0010: AC-3 Posting Restriction
+describe("HomeFeed / PostingRestriction", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("should not have post creation input on home feed", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: mockApiPosts }),
+      })
+    );
+
+    const Home = (await import("@/app/page")).default;
+    render(<Home />);
+
+    await waitFor(() => {
+      expect(screen.getByText("田中 美咲")).toBeInTheDocument();
+    });
+
+    // AC-3: No post creation UI on home feed
+    expect(screen.queryByPlaceholderText("投稿を作成")).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.queryByText("投稿する")).not.toBeInTheDocument();
+  });
+
+  it("should not have post creation input in empty state", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: [] }),
+      })
+    );
+
+    const Home = (await import("@/app/page")).default;
+    render(<Home />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("まだ投稿がありません。コミュニティに参加して投稿してみましょう！")
+      ).toBeInTheDocument();
+    });
+
+    // AC-3: Even in empty state, no post creation UI - user must go to community
+    expect(screen.queryByPlaceholderText("投稿を作成")).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
+  it("should guide users to communities for posting in empty state", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: [] }),
+      })
+    );
+
+    const Home = (await import("@/app/page")).default;
+    render(<Home />);
+
+    // AC-3: Empty state guides user to join communities
+    await waitFor(() => {
+      expect(
+        screen.getByText("まだ投稿がありません。コミュニティに参加して投稿してみましょう！")
+      ).toBeInTheDocument();
+    });
   });
 });

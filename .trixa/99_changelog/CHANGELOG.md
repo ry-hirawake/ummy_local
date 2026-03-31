@@ -30,3 +30,5 @@
 - 2026-03-31 Story-0009: Codexレビューで DoD 達成を確認し Status を Done へ更新 / Impact: AC-1〜AC-4、全テスト、lint、build の品質ゲートを通過し、`story-0011` に着手可能
 - 2026-03-31 Story-0011: コミュニティ詳細投稿フィード実装完了（CommunityPageClient API連携、page.tsxサーバーサイド投稿取得・コメント取得、リポジトリでピン留めソート、ローディング/エラー/空状態、シードデータ動的タイムスタンプ化、テスト10件追加） / Impact: FR-1.4/FR-2.4/FR-3.4準拠、GET /api/communities/{id}/posts経由でデータバック表示・時系列順・ピン留め対応
 - 2026-03-31 Story-0011: Codexレビューで DoD 達成を確認し Status を Done へ更新 / Impact: AC-1〜AC-3、全テスト、lint、build の品質ゲートを通過し、`story-0010` に着手可能
+- 2026-03-31 Story-0010: ホームフィード集約表示機能テスト完備（AggregationDisplay/Refresh/PostingRestriction 9テスト追加、既存実装のAC検証） / Impact: FR-2.3/FR-2.5準拠、複数コミュニティ投稿の時系列集約・更新反映・投稿禁止ルールをテストで保証
+- 2026-03-31 Story-0010: Codexレビューで DoD 達成を確認し Status を Done へ更新 / Impact: AC-1〜AC-3、全テスト、lint、build の品質ゲートを通過し、`story-0014` に着手可能
