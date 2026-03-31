@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import {
   Home as HomeIcon,
@@ -25,8 +25,17 @@ const communities = [
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const pathname = usePathname();
+  const router = useRouter();
   const { user } = useAuth();
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   async function handleLogout(): Promise<void> {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -64,20 +73,24 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </Link>
 
             {/* Search Bar */}
-            <motion.div
-              className="relative w-full max-w-lg"
-              animate={{ scale: isSearchFocused ? 1.02 : 1 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Ummyを検索"
-                className="w-full rounded-lg border border-border bg-secondary px-12 py-2.5 text-sm outline-none transition-all focus:border-primary/50 focus:bg-background"
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
-              />
-            </motion.div>
+            <form onSubmit={handleSearchSubmit} className="w-full max-w-lg">
+              <motion.div
+                className="relative"
+                animate={{ scale: isSearchFocused ? 1.02 : 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Ummyを検索"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-secondary px-12 py-2.5 text-sm outline-none transition-all focus:border-primary/50 focus:bg-background"
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                />
+              </motion.div>
+            </form>
 
             {/* Right Actions */}
             <div className="flex items-center gap-3">

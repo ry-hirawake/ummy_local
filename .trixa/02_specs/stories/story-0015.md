@@ -7,7 +7,7 @@
 - 初期フェーズでは全文検索高度化よりも再現性ある基本検索を優先する
 
 ## Status
-Accepted
+Done
 
 ## Goal
 - `FR-6.1` から `FR-6.4` を満たし、Ummy の知見蓄積価値を支える検索の最小機能を成立させる
@@ -53,9 +53,10 @@ And 0 件時は空状態を表示する
 ## Test Mapping
 | AC | Test Suite | File |
 |---|---|---|
-| AC-1 | `Search / Posts` | `src/__tests__/search.integration.test.tsx` |
-| AC-2 | `Search / Communities` | `src/__tests__/search.integration.test.tsx` |
-| AC-3 | `Search / OrderingAndEmpty` | `src/__tests__/search.integration.test.tsx` |
+| AC-1 | `Search / Posts` | `src/__tests__/search.integration.test.tsx` (2 tests) |
+| AC-2 | `Search / Communities` | `src/__tests__/search.integration.test.tsx` (2 tests) |
+| AC-3 | `Search / OrderingAndEmpty` | `src/__tests__/search.integration.test.tsx` (3 tests) |
+| Service | `Search / ServiceLevel` | `src/__tests__/search.integration.test.tsx` (2 tests) |
 
 ## Research Questions (if needed)
 - RQ-1: 解消済み。初期フェーズでは全文検索エンジンを導入せず、結果は各セクション内で新しい順に表示する

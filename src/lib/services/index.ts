@@ -10,6 +10,7 @@ import { PostService } from "./post-service";
 import { CommentService } from "./comment-service";
 import { ReactionService } from "./reaction-service";
 import { NotificationService } from "./notification-service";
+import { SearchService } from "./search-service";
 
 export interface Services {
   users: UserService;
@@ -18,6 +19,7 @@ export interface Services {
   comments: CommentService;
   reactions: ReactionService;
   notifications: NotificationService;
+  search: SearchService;
 }
 
 let instance: Services | null = null;
@@ -33,6 +35,7 @@ export function getServices(): Services {
     comments: new CommentService(repos),
     reactions: new ReactionService(repos),
     notifications: new NotificationService(repos),
+    search: new SearchService(repos),
   };
 
   return instance;
@@ -49,3 +52,4 @@ export { PostService } from "./post-service";
 export { CommentService } from "./comment-service";
 export { ReactionService } from "./reaction-service";
 export { NotificationService } from "./notification-service";
+export { SearchService } from "./search-service";
