@@ -1,33 +1,92 @@
 /**
  * Community Detail Page - Client Container
  * Manages client-side interaction state for the community feed UI.
+ * Story-0011: Fetches posts from API with chronological ordering and pinned post support.
  */
 
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion } from "motion/react";
 import { CommunityHeader, CreatePostInput, CommunityPostCard } from "./_components";
 import {
-  mockCommunityPosts,
   currentUserAvatar,
   type CommunityInfo,
   type CommunityPost,
   type CommunityReactionType,
 } from "./_data";
 
+interface ApiPost {
+  id: string;
+  content: string;
+  createdAt: string;
+  isPinned?: boolean;
+  author: {
+    id: string;
+    name: string;
+    role: string;
+    avatar: string;
+  };
+  reactions: {
+    thumbsUp: number;
+    partyPopper: number;
+    lightbulb: number;
+    laugh: number;
+  };
+  commentCount: number;
+  userReaction?: string;
+}
+
+function formatTimestamp(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return "たった今";
+  if (diffMins < 60) return `${diffMins}分前`;
+  if (diffHours < 24) return `${diffHours}時間前`;
+  if (diffDays < 7) return `${diffDays}日前`;
+  return date.toLocaleDateString("ja-JP");
+}
+
+function apiPostToCommunityPost(apiPost: ApiPost): CommunityPost {
+  return {
+    id: apiPost.id,
+    author: {
+      name: apiPost.author.name,
+      role: apiPost.author.role,
+      avatar: apiPost.author.avatar,
+    },
+    content: apiPost.content,
+    timestamp: formatTimestamp(apiPost.createdAt),
+    likes: Object.values(apiPost.reactions).reduce((a, b) => a + b, 0),
+    comments: apiPost.commentCount,
+    shares: 0,
+    reactions: apiPost.reactions,
+    userReaction: apiPost.userReaction,
+    isPinned: apiPost.isPinned,
+  };
+}
+
 interface CommunityPageClientProps {
   community: CommunityInfo;
   communityId?: string;
   initialMembership?: boolean;
+  initialPosts?: CommunityPost[];
 }
 
 export function CommunityPageClient({
   community,
   communityId,
   initialMembership = true,
+  initialPosts,
 }: CommunityPageClientProps): React.ReactElement {
-  const [posts, setPosts] = useState<CommunityPost[]>(mockCommunityPosts);
+  const [posts, setPosts] = useState<CommunityPost[]>(initialPosts ?? []);
+  const [isLoading, setIsLoading] = useState(!initialPosts && !!communityId);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [showReactions, setShowReactions] = useState<string | null>(null);
   const [expandedComments, setExpandedComments] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -36,6 +95,44 @@ export function CommunityPageClient({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPostSubmitting, setIsPostSubmitting] = useState(false);
   const [postError, setPostError] = useState<string | null>(null);
+
+  // Fetch posts from API (only when communityId is provided and no initialPosts)
+  const fetchPosts = useCallback(async () => {
+    if (!communityId) return;
+
+    setIsLoading(true);
+    setFetchError(null);
+
+    try {
+      const response = await fetch(`/api/communities/${communityId}/posts`);
+      if (!response.ok) {
+        throw new Error("投稿の取得に失敗しました");
+      }
+      const data = await response.json();
+      const fetchedPosts = (data.posts ?? []).map(apiPostToCommunityPost);
+
+      // Sort: pinned posts first, then by newest
+      // (API already returns sorted by createdAt desc, but we ensure pinned is at top)
+      fetchedPosts.sort((a: CommunityPost, b: CommunityPost) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        return 0; // Keep API order for same pinned status
+      });
+
+      setPosts(fetchedPosts);
+    } catch (err) {
+      setFetchError(err instanceof Error ? err.message : "エラーが発生しました");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [communityId]);
+
+  useEffect(() => {
+    // Only fetch if we don't have initial posts and have a communityId
+    if (!initialPosts && communityId) {
+      fetchPosts();
+    }
+  }, [fetchPosts, initialPosts, communityId]);
 
   const handleJoinToggle = useCallback(async () => {
     if (isSubmitting || !communityId) {
@@ -177,6 +274,82 @@ export function CommunityPageClient({
     setReplyingTo(replyingTo === commentId ? null : commentId);
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <CommunityHeader
+          community={communityWithUpdatedCount}
+          isJoined={isJoined}
+          onJoinToggle={handleJoinToggle}
+        />
+        <div className="mx-auto max-w-4xl px-6 py-6">
+          {isJoined && (
+            <CreatePostInput
+              communityName={community.name}
+              currentUserAvatar={currentUserAvatar}
+              onSubmit={handlePostSubmit}
+              isSubmitting={isPostSubmitting}
+              error={postError}
+            />
+          )}
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="animate-pulse rounded-lg border border-border/50 bg-card p-6"
+              >
+                <div className="flex gap-3">
+                  <div className="h-10 w-10 rounded-full bg-muted" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-1/4 rounded bg-muted" />
+                    <div className="h-3 w-1/6 rounded bg-muted" />
+                  </div>
+                </div>
+                <div className="mt-4 space-y-2">
+                  <div className="h-4 w-full rounded bg-muted" />
+                  <div className="h-4 w-3/4 rounded bg-muted" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Error state
+  if (fetchError) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <CommunityHeader
+          community={communityWithUpdatedCount}
+          isJoined={isJoined}
+          onJoinToggle={handleJoinToggle}
+        />
+        <div className="mx-auto max-w-4xl px-6 py-6">
+          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center">
+            <p className="text-destructive">{fetchError}</p>
+            <button
+              onClick={fetchPosts}
+              className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              再試行
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -200,25 +373,33 @@ export function CommunityPageClient({
           />
         )}
 
-        <div className="space-y-4">
-          {posts.map((post, index) => (
-            <CommunityPostCard
-              key={post.id}
-              post={post}
-              index={index}
-              showReactions={showReactions === post.id}
-              expandedComments={expandedComments === post.id}
-              replyingTo={replyingTo}
-              currentUserAvatar={currentUserAvatar}
-              onReactionToggle={() =>
-                setShowReactions(showReactions === post.id ? null : post.id)
-              }
-              onReactionSelect={(reactionType) => handleReaction(post.id, reactionType)}
-              onCommentsToggle={() => toggleComments(post.id)}
-              onReplyToggle={handleReplyToggle}
-            />
-          ))}
-        </div>
+        {posts.length === 0 ? (
+          <div className="rounded-lg border border-border/50 bg-card p-6 text-center">
+            <p className="text-muted-foreground">
+              まだ投稿がありません。最初の投稿を作成してみましょう！
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {posts.map((post, index) => (
+              <CommunityPostCard
+                key={post.id}
+                post={post}
+                index={index}
+                showReactions={showReactions === post.id}
+                expandedComments={expandedComments === post.id}
+                replyingTo={replyingTo}
+                currentUserAvatar={currentUserAvatar}
+                onReactionToggle={() =>
+                  setShowReactions(showReactions === post.id ? null : post.id)
+                }
+                onReactionSelect={(reactionType) => handleReaction(post.id, reactionType)}
+                onCommentsToggle={() => toggleComments(post.id)}
+                onReplyToggle={handleReplyToggle}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </motion.div>
   );

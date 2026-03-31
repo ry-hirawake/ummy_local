@@ -12,7 +12,13 @@ export class InMemoryPostRepository implements PostRepository {
   async findByCommunityId(communityId: string): Promise<PostEntity[]> {
     return Array.from(this.posts.values())
       .filter((p) => p.communityId === communityId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      .sort((a, b) => {
+        // Pinned posts first
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        // Then by createdAt descending (newest first)
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
   }
 
   async findAll(): Promise<PostEntity[]> {

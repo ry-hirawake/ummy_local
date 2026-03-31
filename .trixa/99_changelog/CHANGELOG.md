@@ -28,3 +28,5 @@
 - 2026-03-31 Story-0009: コミュニティ内投稿作成機能実装完了（CreatePostInputフォーム化、CommunityPageClient投稿API連携、PostServiceバリデーション・参加チェック、ホーム直下投稿禁止、テスト11件追加） / Impact: FR-2.1/FR-2.2/FR-2.4準拠、POST /api/communities/{id}/posts経由で投稿作成・バリデーション・集約表示対応
 - 2026-03-31 Story-0009 AC-4: ホームフィードをAPI経由で取得するよう修正（GET /api/posts追加、page.tsxをmockPosts→fetch化、ローディング/エラー/空状態対応、関連テスト修正） / Impact: 新規作成投稿がホームに即座に反映される
 - 2026-03-31 Story-0009: Codexレビューで DoD 達成を確認し Status を Done へ更新 / Impact: AC-1〜AC-4、全テスト、lint、build の品質ゲートを通過し、`story-0011` に着手可能
+- 2026-03-31 Story-0011: コミュニティ詳細投稿フィード実装完了（CommunityPageClient API連携、page.tsxサーバーサイド投稿取得・コメント取得、リポジトリでピン留めソート、ローディング/エラー/空状態、シードデータ動的タイムスタンプ化、テスト10件追加） / Impact: FR-1.4/FR-2.4/FR-3.4準拠、GET /api/communities/{id}/posts経由でデータバック表示・時系列順・ピン留め対応
+- 2026-03-31 Story-0011: Codexレビューで DoD 達成を確認し Status を Done へ更新 / Impact: AC-1〜AC-3、全テスト、lint、build の品質ゲートを通過し、`story-0010` に着手可能

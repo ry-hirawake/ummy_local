@@ -383,6 +383,7 @@ describe("CommunityMembership / Idempotency", () => {
         community={mockCommunity}
         communityId="c1"
         initialMembership={false}
+        initialPosts={[]}
       />
     );
 

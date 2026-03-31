@@ -33,14 +33,12 @@ type SeedableRepositories = Repositories & {
   notifications: InMemoryNotificationRepository;
 };
 
-const BASE_DATE = new Date("2026-03-30T10:00:00Z");
-
 function hoursAgo(hours: number): Date {
-  return new Date(BASE_DATE.getTime() - hours * 60 * 60 * 1000);
+  return new Date(Date.now() - hours * 60 * 60 * 1000);
 }
 
 function minutesAgo(minutes: number): Date {
-  return new Date(BASE_DATE.getTime() - minutes * 60 * 1000);
+  return new Date(Date.now() - minutes * 60 * 1000);
 }
 
 export function seedRepositories(repos: SeedableRepositories): void {

@@ -4,15 +4,33 @@
  *
  * Story Mapping (tracked in SSOT):
  * - Story-0003: AC-1 to AC-5
+ * - Story-0011: AC-1 to AC-3 (DataBackedDisplay, ChronologicalOrder, EmptyState)
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import fs from "fs";
 import path from "path";
 import { notFound } from "next/navigation";
 import { resetRepositories } from "@/lib/repositories";
 import { getServices, resetServices } from "@/lib/services";
+
+// Mock session for authenticated tests (user-1 = 田中 美咲)
+vi.mock("@/lib/auth/session", () => ({
+  getSession: vi.fn(() =>
+    Promise.resolve({
+      user: {
+        id: "user-1",
+        email: "tanaka@ummy.example.com",
+        name: "田中 美咲",
+        avatar: "https://example.com/avatar.jpg",
+      },
+      expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+    })
+  ),
+  setSessionCookie: vi.fn(),
+  deleteSessionCookie: vi.fn(),
+}));
 
 async function renderCommunityPage(id = "community-1"): Promise<void> {
   const CommunityPage = (await import("@/app/community/[id]/page")).default;
@@ -357,5 +375,450 @@ describe("CommunityFeed / ImageOptimization", () => {
 
     expect(componentContent).toMatch(/import Image from "next\/image"/);
     expect(componentContent).not.toMatch(/<img\s/);
+  });
+});
+
+// =============================================================================
+// Story-0011: コミュニティ詳細で投稿フィードを時系列表示できる
+// =============================================================================
+
+// Mock AuthContext for client component tests
+vi.mock("@/components/auth/AuthContext", () => ({
+  useAuth: vi.fn(() => ({
+    user: { id: "u1", name: "テストユーザー", avatar: "/test.png" },
+  })),
+}));
+
+const mockCommunityForClientTests = {
+  name: "テストコミュニティ",
+  icon: "🧪",
+  description: "テスト用コミュニティ",
+  members: 10,
+};
+
+// Feature: Data-Backed Display (Story-0011 AC-1)
+describe("CommunityFeed / DataBackedDisplay", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("should fetch and display posts from API", async () => {
+    const mockPosts = [
+      {
+        id: "p1",
+        content: "APIからの投稿です",
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        author: {
+          id: "u1",
+          name: "田中 太郎",
+          role: "エンジニア",
+          avatar: "/avatar1.png",
+        },
+        reactions: { thumbsUp: 5, partyPopper: 2, lightbulb: 1, laugh: 0 },
+        commentCount: 3,
+      },
+    ];
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: mockPosts }),
+      })
+    );
+
+    const { CommunityPageClient } = await import(
+      "@/app/community/[id]/CommunityPageClient"
+    );
+    render(
+      <CommunityPageClient
+        community={mockCommunityForClientTests}
+        communityId="c1"
+        initialMembership={true}
+      />
+    );
+
+    // AC-1: Posts fetched from API are displayed
+    await waitFor(() => {
+      expect(screen.getByText("APIからの投稿です")).toBeInTheDocument();
+    });
+
+    // Verify API was called with correct endpoint
+    expect(fetch).toHaveBeenCalledWith("/api/communities/c1/posts");
+  });
+
+  it("should display author information for each post", async () => {
+    const mockPosts = [
+      {
+        id: "p1",
+        content: "テスト投稿",
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+        author: {
+          id: "u1",
+          name: "佐藤 花子",
+          role: "デザイナー",
+          avatar: "/avatar.png",
+        },
+        reactions: { thumbsUp: 0, partyPopper: 0, lightbulb: 0, laugh: 0 },
+        commentCount: 0,
+      },
+    ];
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: mockPosts }),
+      })
+    );
+
+    const { CommunityPageClient } = await import(
+      "@/app/community/[id]/CommunityPageClient"
+    );
+    render(
+      <CommunityPageClient
+        community={mockCommunityForClientTests}
+        communityId="c1"
+        initialMembership={true}
+      />
+    );
+
+    // AC-1: Author info displayed
+    await waitFor(() => {
+      expect(screen.getByText("佐藤 花子")).toBeInTheDocument();
+    });
+    expect(screen.getByText("デザイナー")).toBeInTheDocument();
+  });
+
+  it("should display timestamp for each post", async () => {
+    const mockPosts = [
+      {
+        id: "p1",
+        content: "タイムスタンプテスト",
+        createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+        author: {
+          id: "u1",
+          name: "テスター",
+          role: "QA",
+          avatar: "/avatar.png",
+        },
+        reactions: { thumbsUp: 0, partyPopper: 0, lightbulb: 0, laugh: 0 },
+        commentCount: 0,
+      },
+    ];
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: mockPosts }),
+      })
+    );
+
+    const { CommunityPageClient } = await import(
+      "@/app/community/[id]/CommunityPageClient"
+    );
+    render(
+      <CommunityPageClient
+        community={mockCommunityForClientTests}
+        communityId="c1"
+        initialMembership={true}
+      />
+    );
+
+    // AC-1: Timestamp displayed
+    await waitFor(() => {
+      expect(screen.getByText("3時間前")).toBeInTheDocument();
+    });
+  });
+
+  it("should display posts with zero comments and reactions (EC-2)", async () => {
+    const mockPosts = [
+      {
+        id: "p1",
+        content: "ゼロカウントの投稿",
+        createdAt: new Date().toISOString(),
+        author: {
+          id: "u1",
+          name: "テスター",
+          role: "QA",
+          avatar: "/avatar.png",
+        },
+        reactions: { thumbsUp: 0, partyPopper: 0, lightbulb: 0, laugh: 0 },
+        commentCount: 0,
+      },
+    ];
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: mockPosts }),
+      })
+    );
+
+    const { CommunityPageClient } = await import(
+      "@/app/community/[id]/CommunityPageClient"
+    );
+    render(
+      <CommunityPageClient
+        community={mockCommunityForClientTests}
+        communityId="c1"
+        initialMembership={true}
+      />
+    );
+
+    // EC-2: Post with zero counts should still render
+    await waitFor(() => {
+      expect(screen.getByText("ゼロカウントの投稿")).toBeInTheDocument();
+    });
+  });
+});
+
+// Feature: Chronological Order (Story-0011 AC-2)
+describe("CommunityFeed / ChronologicalOrder", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("should display posts in newest-first order", async () => {
+    const mockPosts = [
+      {
+        id: "p1",
+        content: "最新の投稿",
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+        isPinned: false,
+        author: { id: "u1", name: "ユーザー1", role: "役職", avatar: "/a.png" },
+        reactions: { thumbsUp: 0, partyPopper: 0, lightbulb: 0, laugh: 0 },
+        commentCount: 0,
+      },
+      {
+        id: "p2",
+        content: "古い投稿",
+        createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+        isPinned: false,
+        author: { id: "u2", name: "ユーザー2", role: "役職", avatar: "/b.png" },
+        reactions: { thumbsUp: 0, partyPopper: 0, lightbulb: 0, laugh: 0 },
+        commentCount: 0,
+      },
+    ];
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: mockPosts }),
+      })
+    );
+
+    const { CommunityPageClient } = await import(
+      "@/app/community/[id]/CommunityPageClient"
+    );
+    render(
+      <CommunityPageClient
+        community={mockCommunityForClientTests}
+        communityId="c1"
+        initialMembership={true}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("最新の投稿")).toBeInTheDocument();
+    });
+
+    // AC-2: Posts are in newest-first order
+    const articles = screen.getAllByRole("article");
+    expect(articles[0]).toHaveTextContent("最新の投稿");
+    expect(articles[1]).toHaveTextContent("古い投稿");
+  });
+
+  it("should display pinned post at the top", async () => {
+    const mockPosts = [
+      {
+        id: "p1",
+        content: "ピン留めされた古い投稿",
+        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+        isPinned: true,
+        author: { id: "u1", name: "ユーザー1", role: "役職", avatar: "/a.png" },
+        reactions: { thumbsUp: 0, partyPopper: 0, lightbulb: 0, laugh: 0 },
+        commentCount: 0,
+      },
+      {
+        id: "p2",
+        content: "最新の通常投稿",
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+        isPinned: false,
+        author: { id: "u2", name: "ユーザー2", role: "役職", avatar: "/b.png" },
+        reactions: { thumbsUp: 0, partyPopper: 0, lightbulb: 0, laugh: 0 },
+        commentCount: 0,
+      },
+      {
+        id: "p3",
+        content: "古い通常投稿",
+        createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+        isPinned: false,
+        author: { id: "u3", name: "ユーザー3", role: "役職", avatar: "/c.png" },
+        reactions: { thumbsUp: 0, partyPopper: 0, lightbulb: 0, laugh: 0 },
+        commentCount: 0,
+      },
+    ];
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: mockPosts }),
+      })
+    );
+
+    const { CommunityPageClient } = await import(
+      "@/app/community/[id]/CommunityPageClient"
+    );
+    render(
+      <CommunityPageClient
+        community={mockCommunityForClientTests}
+        communityId="c1"
+        initialMembership={true}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("ピン留めされた古い投稿")).toBeInTheDocument();
+    });
+
+    // AC-2: Pinned post is at the top, then newest-first for regular posts
+    const articles = screen.getAllByRole("article");
+    expect(articles[0]).toHaveTextContent("ピン留めされた古い投稿");
+    expect(articles[1]).toHaveTextContent("最新の通常投稿");
+    expect(articles[2]).toHaveTextContent("古い通常投稿");
+  });
+});
+
+// Feature: Empty State (Story-0011 AC-3)
+describe("CommunityFeed / EmptyState", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("should display empty state message when no posts exist", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: [] }),
+      })
+    );
+
+    const { CommunityPageClient } = await import(
+      "@/app/community/[id]/CommunityPageClient"
+    );
+    render(
+      <CommunityPageClient
+        community={mockCommunityForClientTests}
+        communityId="c1"
+        initialMembership={true}
+      />
+    );
+
+    // AC-3: Empty state message displayed
+    await waitFor(() => {
+      expect(screen.getByText(/まだ投稿がありません/)).toBeInTheDocument();
+    });
+  });
+
+  it("should show guidance for first post creation", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: [] }),
+      })
+    );
+
+    const { CommunityPageClient } = await import(
+      "@/app/community/[id]/CommunityPageClient"
+    );
+    render(
+      <CommunityPageClient
+        community={mockCommunityForClientTests}
+        communityId="c1"
+        initialMembership={true}
+      />
+    );
+
+    // AC-3: Guidance for first post
+    await waitFor(() => {
+      expect(screen.getByText(/最初の投稿/)).toBeInTheDocument();
+    });
+  });
+});
+
+// Feature: Loading and Error States (Story-0011)
+describe("CommunityFeed / LoadingAndError", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("should show loading state while fetching", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockReturnValue(new Promise(() => {})) // Never resolves
+    );
+
+    const { CommunityPageClient } = await import(
+      "@/app/community/[id]/CommunityPageClient"
+    );
+    const { container } = render(
+      <CommunityPageClient
+        community={mockCommunityForClientTests}
+        communityId="c1"
+        initialMembership={true}
+      />
+    );
+
+    // Loading skeleton should be visible
+    const skeletons = container.querySelectorAll(".animate-pulse");
+    expect(skeletons.length).toBeGreaterThan(0);
+  });
+
+  it("should show error message on fetch failure", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+      })
+    );
+
+    const { CommunityPageClient } = await import(
+      "@/app/community/[id]/CommunityPageClient"
+    );
+    render(
+      <CommunityPageClient
+        community={mockCommunityForClientTests}
+        communityId="c1"
+        initialMembership={true}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/取得に失敗しました/)).toBeInTheDocument();
+    });
   });
 });

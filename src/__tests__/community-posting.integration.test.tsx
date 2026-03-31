@@ -213,6 +213,7 @@ describe("CommunityPosting / Validation", () => {
         community={mockCommunity}
         communityId="c1"
         initialMembership={true}
+        initialPosts={[]}
       />
     );
 
@@ -230,6 +231,7 @@ describe("CommunityPosting / Validation", () => {
         community={mockCommunity}
         communityId="c1"
         initialMembership={true}
+        initialPosts={[]}
       />
     );
 
@@ -250,6 +252,7 @@ describe("CommunityPosting / Validation", () => {
         community={mockCommunity}
         communityId="c1"
         initialMembership={true}
+        initialPosts={[]}
       />
     );
 
@@ -284,6 +287,7 @@ describe("CommunityPosting / Validation", () => {
         community={mockCommunity}
         communityId="c1"
         initialMembership={true}
+        initialPosts={[]}
       />
     );
 
@@ -334,6 +338,7 @@ describe("CommunityPosting / Validation", () => {
         community={mockCommunity}
         communityId="c1"
         initialMembership={true}
+        initialPosts={[]}
       />
     );
 
@@ -471,6 +476,7 @@ describe("CommunityPosting / EdgeCases", () => {
         community={mockCommunity}
         communityId="c1"
         initialMembership={false}
+        initialPosts={[]}
       />
     );
 
