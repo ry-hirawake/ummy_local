@@ -49,6 +49,7 @@ export interface MembershipRepository {
 export interface PostRepository {
   findById(id: string): Promise<PostEntity | null>;
   findByCommunityId(communityId: string): Promise<PostEntity[]>;
+  findAll(): Promise<PostEntity[]>;
   create(input: CreatePostInput): Promise<PostEntity>;
   update(id: string, input: UpdatePostInput): Promise<PostEntity | null>;
   delete(id: string): Promise<boolean>;

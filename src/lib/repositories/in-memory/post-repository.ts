@@ -15,6 +15,11 @@ export class InMemoryPostRepository implements PostRepository {
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
+  async findAll(): Promise<PostEntity[]> {
+    return Array.from(this.posts.values())
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
   async create(input: CreatePostInput): Promise<PostEntity> {
     const now = new Date();
     const post: PostEntity = {

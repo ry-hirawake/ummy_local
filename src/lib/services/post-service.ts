@@ -13,6 +13,7 @@ export interface EnrichedPost extends PostEntity {
   reactions: Record<ReactionType, number>;
   commentCount: number;
   userReaction?: ReactionType;
+  community?: { name: string; icon: string };
 }
 
 export class PostService {
@@ -44,17 +45,49 @@ export class PostService {
     return ok(enriched);
   }
 
+  async getAll(currentUserId?: string): Promise<ServiceResult<EnrichedPost[]>> {
+    const posts = await this.repos.posts.findAll();
+    const enriched: EnrichedPost[] = [];
+    for (const post of posts) {
+      enriched.push(await this.enrichPost(post, currentUserId, true));
+    }
+    return ok(enriched);
+  }
+
   async create(input: CreatePostInput): Promise<ServiceResult<PostEntity>> {
+    // Validate content
+    const trimmedContent = input.content.trim();
+    if (trimmedContent.length === 0) {
+      return fail("VALIDATION", "投稿内容は必須です");
+    }
+    if (trimmedContent.length > 2000) {
+      return fail("VALIDATION", "投稿内容は2000文字以内で入力してください");
+    }
+
+    // Check community exists
     const community = await this.repos.communities.findById(input.communityId);
     if (!community) return fail("NOT_FOUND", "コミュニティが見つかりません");
 
-    const post = await this.repos.posts.create(input);
+    // Check membership (EC-1: non-members cannot post)
+    const membership = await this.repos.memberships.findByUserAndCommunity(
+      input.authorId,
+      input.communityId
+    );
+    if (!membership) {
+      return fail("FORBIDDEN", "コミュニティに参加していないため投稿できません");
+    }
+
+    const post = await this.repos.posts.create({
+      ...input,
+      content: trimmedContent,
+    });
     return ok(post);
   }
 
   private async enrichPost(
     post: PostEntity,
-    currentUserId?: string
+    currentUserId?: string,
+    includeCommunity = false
   ): Promise<EnrichedPost> {
     const author = await this.repos.users.findById(post.authorId);
     const reactions = await this.repos.reactions.countByPostId(post.id);
@@ -69,12 +102,21 @@ export class PostService {
       if (reaction) userReaction = reaction.type;
     }
 
+    let community: { name: string; icon: string } | undefined;
+    if (includeCommunity) {
+      const communityEntity = await this.repos.communities.findById(post.communityId);
+      if (communityEntity) {
+        community = { name: communityEntity.name, icon: communityEntity.icon };
+      }
+    }
+
     return {
       ...post,
       author: author!,
       reactions,
       commentCount,
       userReaction,
+      community,
     };
   }
 }

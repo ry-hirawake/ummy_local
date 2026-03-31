@@ -5,7 +5,7 @@
  */
 
 export interface ServiceError {
-  code: "NOT_FOUND" | "UNAUTHORIZED" | "CONFLICT" | "VALIDATION" | "INTERNAL";
+  code: "NOT_FOUND" | "UNAUTHORIZED" | "CONFLICT" | "VALIDATION" | "FORBIDDEN" | "INTERNAL";
   message: string;
 }
 

@@ -34,6 +34,8 @@ export function CommunityPageClient({
   const [isJoined, setIsJoined] = useState(initialMembership);
   const [memberCount, setMemberCount] = useState(community.members);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPostSubmitting, setIsPostSubmitting] = useState(false);
+  const [postError, setPostError] = useState<string | null>(null);
 
   const handleJoinToggle = useCallback(async () => {
     if (isSubmitting || !communityId) {
@@ -91,6 +93,58 @@ export function CommunityPageClient({
     members: memberCount,
   };
 
+  const handlePostSubmit = useCallback(
+    async (content: string) => {
+      if (isPostSubmitting || !communityId) return;
+
+      setIsPostSubmitting(true);
+      setPostError(null);
+
+      try {
+        const response = await fetch(`/api/communities/${communityId}/posts`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content }),
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          setPostError(data.error || "投稿の作成に失敗しました");
+          return;
+        }
+
+        const data = await response.json();
+        const newPost: CommunityPost = {
+          id: data.post.id,
+          author: data.post.author || {
+            name: "あなた",
+            role: "",
+            avatar: currentUserAvatar,
+          },
+          content: data.post.content,
+          timestamp: "たった今",
+          likes: 0,
+          comments: 0,
+          shares: 0,
+          reactions: data.post.reactions || {
+            thumbsUp: 0,
+            partyPopper: 0,
+            lightbulb: 0,
+            laugh: 0,
+          },
+        };
+
+        // Add new post at the top of the feed
+        setPosts([newPost, ...posts]);
+      } catch {
+        setPostError("ネットワークエラーが発生しました");
+      } finally {
+        setIsPostSubmitting(false);
+      }
+    },
+    [isPostSubmitting, communityId, posts]
+  );
+
   const handleReaction = (postId: string, reactionType: CommunityReactionType) => {
     setPosts(
       posts.map((post) => {
@@ -136,10 +190,15 @@ export function CommunityPageClient({
       />
 
       <div className="mx-auto max-w-4xl px-6 py-6">
-        <CreatePostInput
-          communityName={community.name}
-          currentUserAvatar={currentUserAvatar}
-        />
+        {isJoined && (
+          <CreatePostInput
+            communityName={community.name}
+            currentUserAvatar={currentUserAvatar}
+            onSubmit={handlePostSubmit}
+            isSubmitting={isPostSubmitting}
+            error={postError}
+          />
+        )}
 
         <div className="space-y-4">
           {posts.map((post, index) => (

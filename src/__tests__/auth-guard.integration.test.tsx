@@ -6,11 +6,11 @@
  * - Story-0005: AC-1 to AC-4
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 import fs from "fs";
 import path from "path";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 
 // --- AC-1: Protected Routes ---
 describe("AuthGuard / ProtectedRoutes", () => {
@@ -67,6 +67,24 @@ describe("AuthGuard / ProtectedRoutes", () => {
   });
 });
 
+// Mock API posts data for Home page rendering test
+const mockApiPosts = [
+  {
+    id: "1",
+    content: "テスト投稿",
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    author: {
+      id: "u1",
+      name: "田中 美咲",
+      role: "マーケティングマネージャー",
+      avatar: "https://example.com/avatar1.jpg",
+    },
+    reactions: { thumbsUp: 25, partyPopper: 12, lightbulb: 3, laugh: 2 },
+    commentCount: 8,
+    community: { name: "マーケティング", icon: "📊" },
+  },
+];
+
 // --- AC-2: Authenticated Access ---
 describe("AuthGuard / AuthenticatedAccess", () => {
   let middleware: (req: NextRequest) => ReturnType<typeof import("next/server").NextResponse.next>;
@@ -75,6 +93,10 @@ describe("AuthGuard / AuthenticatedAccess", () => {
     vi.resetModules();
     const mod = await import("@/middleware");
     middleware = mod.middleware;
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it("should allow access when session cookie exists on /", () => {
@@ -96,11 +118,21 @@ describe("AuthGuard / AuthenticatedAccess", () => {
   });
 
   it("should preserve existing page rendering when authenticated", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ posts: mockApiPosts }),
+      })
+    );
+
     // Verify that home page component still renders correctly
     const Home = (await import("@/app/page")).default;
     render(<Home />);
 
-    expect(screen.getByText("田中 美咲")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("田中 美咲")).toBeInTheDocument();
+    });
   });
 });
 
