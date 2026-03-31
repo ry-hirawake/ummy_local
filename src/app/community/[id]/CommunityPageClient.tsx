@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "motion/react";
 import { CommunityHeader, CreatePostInput, CommunityPostCard } from "./_components";
 import {
@@ -18,16 +18,78 @@ import {
 
 interface CommunityPageClientProps {
   community: CommunityInfo;
+  communityId?: string;
+  initialMembership?: boolean;
 }
 
 export function CommunityPageClient({
   community,
+  communityId,
+  initialMembership = true,
 }: CommunityPageClientProps): React.ReactElement {
   const [posts, setPosts] = useState<CommunityPost[]>(mockCommunityPosts);
   const [showReactions, setShowReactions] = useState<string | null>(null);
   const [expandedComments, setExpandedComments] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
-  const [isJoined, setIsJoined] = useState(true);
+  const [isJoined, setIsJoined] = useState(initialMembership);
+  const [memberCount, setMemberCount] = useState(community.members);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleJoinToggle = useCallback(async () => {
+    if (isSubmitting || !communityId) {
+      // If communityId is not provided, fall back to local state toggle
+      if (!communityId) {
+        setIsJoined(!isJoined);
+      }
+      return;
+    }
+
+    setIsSubmitting(true);
+    const wasJoined = isJoined;
+    const previousMemberCount = memberCount;
+
+    // Optimistic update
+    setIsJoined(!wasJoined);
+    setMemberCount(wasJoined ? memberCount - 1 : memberCount + 1);
+
+    try {
+      const response = await fetch(`/api/communities/${communityId}/members`, {
+        method: wasJoined ? "DELETE" : "POST",
+      });
+
+      if (!response.ok) {
+        const status = response.status;
+        // Handle idempotency: 409 means already joined, 404 means already left
+        if (status === 409) {
+          // Already joined - UI should reflect joined state
+          // memberCount stays at previousMemberCount (user was already counted)
+          setIsJoined(true);
+          setMemberCount(previousMemberCount);
+        } else if (status === 404) {
+          // Already left - UI should reflect not joined state
+          // memberCount stays at optimistic value (user was already not counted)
+          // So we don't rollback memberCount here
+          setIsJoined(false);
+        } else {
+          // Other errors - rollback
+          setIsJoined(wasJoined);
+          setMemberCount(previousMemberCount);
+        }
+      }
+    } catch {
+      // Network error - rollback optimistic update
+      setIsJoined(wasJoined);
+      setMemberCount(previousMemberCount);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [isJoined, isSubmitting, communityId, memberCount]);
+
+  // Create a community info object with updated member count
+  const communityWithUpdatedCount: CommunityInfo = {
+    ...community,
+    members: memberCount,
+  };
 
   const handleReaction = (postId: string, reactionType: CommunityReactionType) => {
     setPosts(
@@ -68,9 +130,9 @@ export function CommunityPageClient({
       transition={{ delay: 0.2 }}
     >
       <CommunityHeader
-        community={community}
+        community={communityWithUpdatedCount}
         isJoined={isJoined}
-        onJoinToggle={() => setIsJoined(!isJoined)}
+        onJoinToggle={handleJoinToggle}
       />
 
       <div className="mx-auto max-w-4xl px-6 py-6">

@@ -23,3 +23,5 @@
 - 2026-03-31 Story-0006: コミュニティ一覧ページ実装完了（CommunityCard Presentational Component、/communities Container Page、AppLayout「コミュニティを見つける」Link化、テスト7件追加） / Impact: FR-1.3/FR-1.5準拠、GET /api/communities経由で一覧表示・詳細遷移・空/エラー状態対応
 - 2026-03-31 Story-0007: コミュニティ作成機能実装完了（slug正規化ユーティリティ、CommunityCreateDialogコンポーネント、名前バリデーション・slug一意性チェック、API errorコード別status mapping、テスト6件追加） / Impact: FR-1.1準拠、POST /api/communities経由で作成・バリデーション・重複検知・詳細ページ遷移対応
 - 2026-03-31 Story-0007: コミュニティ詳細ページを Service 経由参照へ修正し、新規作成コミュニティIDでの遷移成立を検証追加 / Impact: AC-2 の「作成後に詳細ページへ遷移する」を実装・テストの両面で充足
+- 2026-03-31 Story-0008: コミュニティ参加・退出機能実装完了（CommunityPageClientにAPI連携・Optimistic Update・冪等性対応・二重送信防止、page.tsxでサーバー側メンバーシップ取得、テスト11件追加） / Impact: FR-1.2準拠、POST/DELETE /api/communities/{id}/members経由で参加・退出・メンバー数更新対応
+- 2026-03-31 Story-0008: Codexレビューで DoD 達成を確認し Status を Done へ更新 / Impact: AC-1〜AC-3、全テスト、lint、build の品質ゲートを通過し、`story-0009` に着手可能
