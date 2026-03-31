@@ -38,6 +38,21 @@ export class ReactionService {
     }
 
     const reaction = await this.repos.reactions.create({ postId, userId, type });
+
+    // Story-0016: Generate notification for post author on new reaction (EC-1: skip self-reaction)
+    if (userId !== post.authorId) {
+      const reactor = await this.repos.users.findById(userId);
+      const userName = reactor?.name ?? "ユーザー";
+      const postSnippet = post.content.length > 20 ? post.content.slice(0, 20) + "…" : post.content;
+      await this.repos.notifications.create({
+        userId: post.authorId,
+        type: "reaction",
+        title: "新しいリアクション",
+        message: `${userName}さんがあなたの投稿「${postSnippet}」にリアクションしました`,
+        referenceId: post.id,
+      });
+    }
+
     return ok(reaction);
   }
 

@@ -73,6 +73,7 @@ export interface ReactionRepository {
 
 export interface NotificationRepository {
   findByUserId(userId: string): Promise<NotificationEntity[]>;
+  countUnreadByUserId(userId: string): Promise<number>;
   create(input: CreateNotificationInput): Promise<NotificationEntity>;
   markAsRead(id: string): Promise<boolean>;
   markAllAsRead(userId: string): Promise<number>;

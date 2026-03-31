@@ -8,12 +8,12 @@ import { motion } from "motion/react";
 import {
   Home as HomeIcon,
   Search,
-  Bell,
   Plus,
   Hash,
   LogOut,
 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthContext";
+import { NotificationBell } from "@/components/notification";
 
 const communities = [
   { id: "1", name: "全社アナウンス", icon: "📢", members: 245 },
@@ -94,14 +94,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
             {/* Right Actions */}
             <div className="flex items-center gap-3">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="relative rounded-lg bg-secondary p-2 transition-all hover:bg-muted"
-              >
-                <Bell className="h-5 w-5" />
-                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary"></span>
-              </motion.button>
+              <NotificationBell />
 
               <motion.div
                 whileHover={{ scale: 1.05 }}

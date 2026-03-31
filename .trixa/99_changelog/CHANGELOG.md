@@ -40,3 +40,6 @@
 - 2026-03-31 Story-0013: Codexレビューで DoD 達成を確認し Status を Done へ更新 / Impact: AC-1〜AC-3、EC-1/EC-2、全テスト、lint、build の品質ゲートを通過し、`story-0015` に着手可能
 - 2026-03-31 Story-0015: 投稿・コミュニティ検索機能実装完了（SearchService新規作成、GET /api/search、検索ページUI、NFKC正規化・大小無視・新しい順ソート、テスト9件追加） / Impact: FR-6.1〜FR-6.4準拠、キーワード検索で投稿・コミュニティを横断検索、空状態表示対応
 - 2026-03-31 Story-0015: Codexレビューで DoD 達成を確認し Status を Done へ更新 / Impact: AC-1〜AC-3、EC-1/EC-2、全テスト、lint、build の品質ゲートを通過し、`story-0016` に着手可能
+- 2026-04-01 Story-0016: コメント/リアクション通知の生成・未読バッジ・通知一覧・既読化を実装（CommentService/ReactionService通知生成、NotificationBell/NotificationPanelコンポーネント、countUnread API、テスト10件追加） / Impact: FR-7.1〜FR-7.4準拠、自己通知抑止(EC-1)、個別既読化、未読件数バッジ対応
+- 2026-04-01 Story-0016: Codexレビューで Done 判定を保留し、対象投稿遷移・投稿識別情報・不足テストを Blockers に起票 / Impact: `story-0016` は `Implemented` 維持、Claude は通知UXと検証不足を修正してから再レビュー
+- 2026-04-01 Story-0016: 再レビューで「遷移成功後に既読化」の順序が未達と判明し、既読化タイミング要件を Blockers に追加 / Impact: 投稿識別と投稿遷移は充足したが、`story-0016` は `Implemented` 維持

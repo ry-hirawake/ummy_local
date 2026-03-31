@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import { getServices } from "@/lib/services";
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await getSession();
     if (!session) {
@@ -10,6 +10,16 @@ export async function GET(): Promise<NextResponse> {
     }
 
     const services = getServices();
+    const countOnly = request.nextUrl.searchParams.get("countOnly") === "true";
+
+    if (countOnly) {
+      const result = await services.notifications.countUnread(session.user.id);
+      if (!result.success) {
+        return NextResponse.json({ error: result.error.message }, { status: 500 });
+      }
+      return NextResponse.json({ unreadCount: result.data });
+    }
+
     const result = await services.notifications.getByUserId(session.user.id);
 
     if (!result.success) {

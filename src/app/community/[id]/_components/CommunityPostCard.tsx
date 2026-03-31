@@ -76,6 +76,7 @@ export function CommunityPostCard({
   return (
     <motion.article
       key={post.id}
+      id={`post-${post.id}`}
       initial={{ y: 40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: index * 0.1 }}

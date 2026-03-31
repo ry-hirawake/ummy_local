@@ -57,6 +57,21 @@ export class CommentService {
       ...input,
       content: input.content.trim(),
     });
+
+    // Story-0016: Generate notification for post author (EC-1: skip self-comment)
+    if (input.authorId !== post.authorId) {
+      const commenter = await this.repos.users.findById(input.authorId);
+      const userName = commenter?.name ?? "ユーザー";
+      const postSnippet = post.content.length > 20 ? post.content.slice(0, 20) + "…" : post.content;
+      await this.repos.notifications.create({
+        userId: post.authorId,
+        type: "comment",
+        title: "新しいコメント",
+        message: `${userName}さんがあなたの投稿「${postSnippet}」にコメントしました`,
+        referenceId: post.id,
+      });
+    }
+
     return ok(comment);
   }
 

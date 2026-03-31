@@ -11,6 +11,12 @@ export class InMemoryNotificationRepository implements NotificationRepository {
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
+  async countUnreadByUserId(userId: string): Promise<number> {
+    return Array.from(this.notifications.values()).filter(
+      (n) => n.userId === userId && !n.isRead
+    ).length;
+  }
+
   async create(input: CreateNotificationInput): Promise<NotificationEntity> {
     const notification: NotificationEntity = {
       id: `notification-${this.nextId++}`,

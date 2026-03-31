@@ -52,28 +52,28 @@ Accepted
 
 ## Implementation Start Memo
 - Current target:
-  - Claude は [story-0008.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0008.md) から着手する
+  - Claude は [story-0017.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0017.md) から着手する
 - Read first:
-  - [story-0008.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0008.md)
+  - [story-0017.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0017.md)
   - [story-0018.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/02_specs/stories/story-0018.md)
   - [REQUIREMENTS.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/01_requirements/REQUIREMENTS.md)
   - [CONSTRAINTS.md](/Users/ry-hirawake/workspace/ummy_local/.trixa/01_requirements/CONSTRAINTS.md)
 - Implementation objective:
-  - コミュニティ参加・退出の主導線を成立させること
-  - 参加状態に応じてコミュニティ詳細の表示とメンバー数を更新できること
-  - 後続のコミュニティ投稿権限判定に使える参加状態を整えること
+  - コミュニティのピン留め投稿を管理者が設定できること
+  - ピン留め投稿がコミュニティフィードの先頭表示になること
+  - 1コミュニティ1件のピン留め制約を守ること
 - Minimum output expected from Claude:
-  - コミュニティ参加/退出の UI と API 接続
-  - `story-0008` の AC を満たす統合テスト
-  - コミュニティ詳細または一覧で参加状態が確認できる実装
+  - ピン留め設定 UI と API / Service 実装
+  - `story-0017` の AC を満たす統合テスト
+  - コミュニティフィード先頭表示の実装
   - Story Status を `Implemented` に上げられる状態
 - Stop conditions:
   - AC を満たせない追加仕様が必要になった場合
-  - 参加条件や閲覧条件で新たな設計判断が必要になり Story 修正が要る場合
-  - `story-0009` 以降を先に変更しないと進められない根拠が出た場合
+  - ピン留め権限や表示順で新たな設計判断が必要になり Story 修正が要る場合
+  - `story-0020` 以降を先に変更しないと進められない根拠が出た場合
 
 ## Sequential Rule
-- `story-0008` 完了前に `story-0009` 以降へ進まない
+- `story-0017` 完了前に `story-0020` 以降へ進まない
 - 以後も同様に、次のStoryは直前Storyの実装とレビューが終わるまで開始しない
 
 ## Notes

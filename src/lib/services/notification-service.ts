@@ -16,6 +16,11 @@ export class NotificationService {
     return ok(notifications);
   }
 
+  async countUnread(userId: string): Promise<ServiceResult<number>> {
+    const count = await this.repos.notifications.countUnreadByUserId(userId);
+    return ok(count);
+  }
+
   async create(
     input: CreateNotificationInput
   ): Promise<ServiceResult<NotificationEntity>> {
