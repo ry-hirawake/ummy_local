@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { CommentItem } from "@/components/home/CommentItem";
 import { reactionIcons } from "@/lib/reactions";
+import { DEFAULT_AVATAR } from "@/lib/mock-data";
 import type { CommunityPost, CommunityReactionType } from "../_data";
 
 interface CommunityPostCardProps {
@@ -69,7 +70,7 @@ export function CommunityPostCard({
         <div className="flex gap-3">
           <motion.div whileHover={{ scale: 1.05 }}>
             <Image
-              src={post.author.avatar}
+              src={post.author.avatar || DEFAULT_AVATAR}
               alt={post.author.name}
               width={44}
               height={44}
@@ -78,7 +79,9 @@ export function CommunityPostCard({
           </motion.div>
           <div>
             <h3 className="text-sm font-semibold">{post.author.name}</h3>
-            <p className="text-xs text-muted-foreground">{post.author.role}</p>
+            {post.author.role && (
+              <p className="text-xs text-muted-foreground">{post.author.role}</p>
+            )}
             <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
               <span>{post.timestamp}</span>
             </div>

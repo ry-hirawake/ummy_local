@@ -7,6 +7,7 @@ export interface Comment {
   id: string;
   author: {
     name: string;
+    role?: string;
     avatar: string;
   };
   content: string;

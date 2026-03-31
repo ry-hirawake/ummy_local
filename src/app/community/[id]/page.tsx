@@ -111,6 +111,7 @@ export default async function CommunityPage({
               id: c.id,
               author: {
                 name: c.author.name,
+                role: c.author.role || undefined,
                 avatar: c.author.avatar,
               },
               content: c.content,
@@ -120,6 +121,7 @@ export default async function CommunityPage({
                 id: r.id,
                 author: {
                   name: r.author.name,
+                  role: r.author.role || undefined,
                   avatar: r.author.avatar,
                 },
                 content: r.content,

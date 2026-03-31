@@ -9,6 +9,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import { Send } from "lucide-react";
 import type { Comment } from "@/types/post";
+import { DEFAULT_AVATAR } from "@/lib/mock-data";
 
 interface CommentItemProps {
   comment: Comment;
@@ -34,7 +35,7 @@ export function CommentItem({
       className={`flex gap-3 ${isReply ? "ml-12 mt-3" : ""}`}
     >
       <Image
-        src={comment.author.avatar}
+        src={comment.author.avatar || DEFAULT_AVATAR}
         alt={comment.author.name}
         width={32}
         height={32}
@@ -43,6 +44,9 @@ export function CommentItem({
       <div className="flex-1">
         <div className="rounded-lg bg-secondary px-3 py-2">
           <h4 className="text-sm font-semibold">{comment.author.name}</h4>
+          {comment.author.role && (
+            <p className="text-xs text-muted-foreground">{comment.author.role}</p>
+          )}
           <p className="mt-1 text-sm">{comment.content}</p>
         </div>
         <div className="mt-1 flex items-center gap-4 px-3 text-xs text-muted-foreground">

@@ -146,3 +146,9 @@ export const mockPosts: Post[] = [
  */
 export const currentUserAvatar =
   "https://images.unsplash.com/photo-1689600944138-da3b150d9cb8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHByb2Zlc3Npb25hbCUyMGhlYWRzaG90fGVufDF8fHx8MTc3MjM4MDMxMnww&ixlib=rb-4.1.0&q=80&w=1080";
+
+/**
+ * Default avatar URL for users without a custom avatar (EC-2: Story-0014)
+ */
+export const DEFAULT_AVATAR =
+  "https://images.unsplash.com/photo-1511367461989-f85a21fda167?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=100&q=80";

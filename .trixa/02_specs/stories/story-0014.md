@@ -7,7 +7,7 @@
 - 投稿者/コメント投稿者を識別できるようにする
 
 ## Status
-Accepted
+Done
 
 ## Goal
 - `FR-5.1` から `FR-5.3` を満たし、議論の参加者が誰かを UI 上で識別できる状態を作る
@@ -48,9 +48,11 @@ Then 名前、役職、アバター表示が一貫する
 ## Test Mapping
 | AC | Test Suite | File |
 |---|---|---|
-| AC-1 | `Profiles / PostMetadata` | `src/__tests__/profile-display.integration.test.tsx` |
-| AC-2 | `Profiles / CommentMetadata` | `src/__tests__/profile-display.integration.test.tsx` |
-| AC-3 | `Profiles / Consistency` | `src/__tests__/profile-display.integration.test.tsx` |
+| AC-1 | `Profiles / PostMetadata` | `src/__tests__/profile-display.integration.test.tsx` (2 tests) |
+| AC-2 | `Profiles / CommentMetadata` | `src/__tests__/profile-display.integration.test.tsx` (3 tests) |
+| AC-3 | `Profiles / Consistency` | `src/__tests__/profile-display.integration.test.tsx` (2 tests) |
+| EC-1/EC-2 | `Profiles / DefaultAvatar` | `src/__tests__/profile-display.integration.test.tsx` (2 tests) |
+| EC-1/EC-2 | `Profiles / CommunityPostCardFallback` | `src/__tests__/profile-display.integration.test.tsx` (2 tests) |
 
 ## Research Questions (if needed)
 - RQ-1: 解消済み。コメントと返信でも役職を表示し、未設定時のみ役職欄を省略する
