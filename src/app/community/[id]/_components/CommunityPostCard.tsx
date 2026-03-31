@@ -1,10 +1,11 @@
 /**
  * CommunityPostCard - Presentational Component for community posts
- * Props-only, delegates state changes to callbacks (AC-1, AC-3 compliance)
+ * Props-only, delegates state changes to callbacks (Story-0012 compliance)
  */
 
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -32,6 +33,8 @@ interface CommunityPostCardProps {
   onReactionSelect: (reactionType: CommunityReactionType) => void;
   onCommentsToggle: () => void;
   onReplyToggle: (commentId: string) => void;
+  onCommentSubmit?: (postId: string, content: string) => Promise<void>;
+  onReplySubmit?: (postId: string, commentId: string, content: string) => Promise<void>;
 }
 
 export function CommunityPostCard({
@@ -45,9 +48,30 @@ export function CommunityPostCard({
   onReactionSelect,
   onCommentsToggle,
   onReplyToggle,
+  onCommentSubmit,
+  onReplySubmit,
 }: CommunityPostCardProps) {
   const hasReactions = Object.values(post.reactions).some((count) => count > 0);
   const totalReactions = Object.values(post.reactions).reduce((a, b) => a + b, 0);
+  const [commentContent, setCommentContent] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleCommentSubmit = async () => {
+    if (!commentContent.trim() || isSubmitting || !onCommentSubmit) return;
+
+    setIsSubmitting(true);
+    try {
+      await onCommentSubmit(post.id, commentContent.trim());
+      setCommentContent("");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleReplySubmit = async (commentId: string, content: string) => {
+    if (!onReplySubmit) return;
+    await onReplySubmit(post.id, commentId, content);
+  };
 
   return (
     <motion.article
@@ -228,27 +252,30 @@ export function CommunityPostCard({
 
       {/* Comments Section */}
       <AnimatePresence>
-        {expandedComments && post.commentList && post.commentList.length > 0 && (
+        {expandedComments && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             className="border-t border-border/50 bg-muted/30 p-4"
           >
-            <div className="space-y-4">
-              {post.commentList.map((comment) => (
-                <CommentItem
-                  key={comment.id}
-                  comment={comment}
-                  replyingTo={replyingTo}
-                  currentUserAvatar={currentUserAvatar}
-                  onReplyToggle={onReplyToggle}
-                />
-              ))}
-            </div>
+            {post.commentList && post.commentList.length > 0 && (
+              <div className="space-y-4">
+                {post.commentList.map((comment) => (
+                  <CommentItem
+                    key={comment.id}
+                    comment={comment}
+                    replyingTo={replyingTo}
+                    currentUserAvatar={currentUserAvatar}
+                    onReplyToggle={onReplyToggle}
+                    onReplySubmit={handleReplySubmit}
+                  />
+                ))}
+              </div>
+            )}
 
             {/* Add Comment Input */}
-            <div className="mt-4 flex gap-3 border-t border-border/50 pt-4">
+            <div className={`flex gap-3 ${post.commentList && post.commentList.length > 0 ? "mt-4 border-t border-border/50 pt-4" : ""}`}>
               <Image
                 src={currentUserAvatar}
                 alt="Your avatar"
@@ -260,12 +287,17 @@ export function CommunityPostCard({
                 <input
                   type="text"
                   placeholder="コメントを追加..."
-                  className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary/50"
+                  value={commentContent}
+                  onChange={(e) => setCommentContent(e.target.value)}
+                  disabled={isSubmitting}
+                  className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary/50 disabled:opacity-50"
                 />
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-lg bg-primary p-2 text-primary-foreground transition-all hover:bg-primary/90"
+                  onClick={handleCommentSubmit}
+                  disabled={isSubmitting || !commentContent.trim()}
+                  className="rounded-lg bg-primary p-2 text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50"
                 >
                   <Send className="h-4 w-4" />
                 </motion.button>

@@ -30,15 +30,33 @@ export class CommentService {
   }
 
   async create(input: CreateCommentInput): Promise<ServiceResult<CommentEntity>> {
+    // EC-1: Validate content is not empty or whitespace-only
+    if (!input.content || !input.content.trim()) {
+      return fail("VALIDATION", "コメント内容は必須です");
+    }
+
     const post = await this.repos.posts.findById(input.postId);
     if (!post) return fail("NOT_FOUND", "投稿が見つかりません");
 
     if (input.parentCommentId) {
       const parent = await this.repos.comments.findById(input.parentCommentId);
       if (!parent) return fail("NOT_FOUND", "親コメントが見つかりません");
+
+      // AC-2: Reject cross-post parent (parent must belong to same post)
+      if (parent.postId !== input.postId) {
+        return fail("VALIDATION", "親コメントは同じ投稿に属している必要があります");
+      }
+
+      // AC-2: Reject reply-to-reply (1-level nesting only)
+      if (parent.parentCommentId) {
+        return fail("VALIDATION", "返信への返信はできません");
+      }
     }
 
-    const comment = await this.repos.comments.create(input);
+    const comment = await this.repos.comments.create({
+      ...input,
+      content: input.content.trim(),
+    });
     return ok(comment);
   }
 

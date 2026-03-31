@@ -62,7 +62,12 @@ export async function POST(
     });
 
     if (!result.success) {
-      const status = result.error.code === "NOT_FOUND" ? 404 : 500;
+      const status =
+        result.error.code === "NOT_FOUND"
+          ? 404
+          : result.error.code === "VALIDATION"
+            ? 400
+            : 500;
       return NextResponse.json({ error: result.error.message }, { status });
     }
 

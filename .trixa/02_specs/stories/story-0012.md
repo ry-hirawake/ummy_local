@@ -7,7 +7,7 @@
 - ネスト返信は 1 段階を初期スコープとする
 
 ## Status
-Accepted
+Done
 
 ## Goal
 - `FR-3.1` から `FR-3.4` を満たし、非同期議論の基本単位としてコメントスレッドを成立させる
@@ -52,9 +52,9 @@ Then 著者名、アバター、時刻、本文が表示される
 ## Test Mapping
 | AC | Test Suite | File |
 |---|---|---|
-| AC-1 | `Comments / CreateComment` | `src/__tests__/comments.integration.test.tsx` |
-| AC-2 | `Comments / CreateReply` | `src/__tests__/comments.integration.test.tsx` |
-| AC-3 | `Comments / DisplayMetadata` | `src/__tests__/comments.integration.test.tsx` |
+| AC-1 | `Comments / CreateComment` | `src/__tests__/comments.integration.test.tsx` (3 tests) |
+| AC-2 | `Comments / CreateReply` | `src/__tests__/comments.integration.test.tsx` (2 tests) |
+| AC-3 | `Comments / DisplayMetadata` | `src/__tests__/comments.integration.test.tsx` (2 tests) |
 
 ## Research Questions (if needed)
 - RQ-1: 解消済み。初期フェーズの返信は 1 段階固定とし、多段ネストは将来拡張とする

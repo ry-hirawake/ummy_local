@@ -34,3 +34,5 @@
 - 2026-03-31 Story-0010: Codexレビューで DoD 達成を確認し Status を Done へ更新 / Impact: AC-1〜AC-3、全テスト、lint、build の品質ゲートを通過し、`story-0014` に着手可能
 - 2026-03-31 Story-0014: ユーザープロフィール情報表示完了（Comment型にrole追加、CommentItem役職表示、PostCard/CommentItem/CommunityPostCardで空役職非表示・デフォルトアバターフォールバック、テスト11件追加） / Impact: FR-5.1〜FR-5.3準拠、投稿・コメントで名前・役職・アバター表示、ホーム/コミュニティ画面間一貫性・未設定時フォールバック対応
 - 2026-03-31 Story-0014: Codexレビューで DoD 達成を確認し Status を Done へ更新 / Impact: AC-1〜AC-3、EC-1/EC-2、全テスト、lint、build の品質ゲートを通過し、`story-0012` に着手可能
+- 2026-03-31 Story-0012: コメント・返信作成機能実装完了（CommentItem返信送信・返信ボタン制御、CommunityPostCardコメント送信、CommunityPageClient APIハンドラ、テスト7件追加） / Impact: FR-3.1〜FR-3.4準拠、POST /api/posts/{id}/comments経由でコメント・返信作成、1段階ネスト制限、コメント数リアルタイム反映
+- 2026-03-31 Story-0012: Codexレビューで DoD 達成を確認し Status を Done へ更新 / Impact: AC-1〜AC-3、EC-1、全テスト、lint、build の品質ゲートを通過し、`story-0013` に着手可能

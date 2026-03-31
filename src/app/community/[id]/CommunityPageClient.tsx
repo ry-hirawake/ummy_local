@@ -274,6 +274,92 @@ export function CommunityPageClient({
     setReplyingTo(replyingTo === commentId ? null : commentId);
   };
 
+  // Story-0012: Comment submission handler
+  const handleCommentSubmit = useCallback(
+    async (postId: string, content: string) => {
+      const response = await fetch(`/api/posts/${postId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+
+      if (!response.ok) {
+        throw new Error("コメントの作成に失敗しました");
+      }
+
+      const data = await response.json();
+
+      // Update posts with new comment and increment comment count
+      setPosts(
+        posts.map((post) => {
+          if (post.id !== postId) return post;
+          const newComment = {
+            id: data.comment.id,
+            author: {
+              name: "あなた", // Will be replaced with actual user data
+              avatar: currentUserAvatar,
+            },
+            content: data.comment.content,
+            timestamp: "たった今",
+            likes: 0,
+          };
+          return {
+            ...post,
+            comments: post.comments + 1,
+            commentList: [...(post.commentList || []), newComment],
+          };
+        })
+      );
+    },
+    [posts]
+  );
+
+  // Story-0012: Reply submission handler
+  const handleReplySubmit = useCallback(
+    async (postId: string, commentId: string, content: string) => {
+      const response = await fetch(`/api/posts/${postId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, parentCommentId: commentId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("返信の作成に失敗しました");
+      }
+
+      const data = await response.json();
+
+      // Update posts with new reply
+      setPosts(
+        posts.map((post) => {
+          if (post.id !== postId) return post;
+          const newReply = {
+            id: data.comment.id,
+            author: {
+              name: "あなた",
+              avatar: currentUserAvatar,
+            },
+            content: data.comment.content,
+            timestamp: "たった今",
+            likes: 0,
+          };
+          return {
+            ...post,
+            comments: post.comments + 1,
+            commentList: (post.commentList || []).map((comment) => {
+              if (comment.id !== commentId) return comment;
+              return {
+                ...comment,
+                replies: [...(comment.replies || []), newReply],
+              };
+            }),
+          };
+        })
+      );
+    },
+    [posts]
+  );
+
   // Loading state
   if (isLoading) {
     return (
@@ -396,6 +482,8 @@ export function CommunityPageClient({
                 onReactionSelect={(reactionType) => handleReaction(post.id, reactionType)}
                 onCommentsToggle={() => toggleComments(post.id)}
                 onReplyToggle={handleReplyToggle}
+                onCommentSubmit={handleCommentSubmit}
+                onReplySubmit={handleReplySubmit}
               />
             ))}
           </div>

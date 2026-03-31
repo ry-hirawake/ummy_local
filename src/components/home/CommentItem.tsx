@@ -1,10 +1,11 @@
 /**
  * CommentItem - Presentational Component for displaying comments
- * Props-only, no internal state (AC-1, AC-4 compliance)
+ * Props-only, delegates reply submission to callbacks (Story-0012 compliance)
  */
 
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import { Send } from "lucide-react";
@@ -17,6 +18,7 @@ interface CommentItemProps {
   replyingTo: string | null;
   currentUserAvatar: string;
   onReplyToggle: (commentId: string) => void;
+  onReplySubmit?: (commentId: string, content: string) => Promise<void>;
 }
 
 export function CommentItem({
@@ -25,8 +27,24 @@ export function CommentItem({
   replyingTo,
   currentUserAvatar,
   onReplyToggle,
+  onReplySubmit,
 }: CommentItemProps) {
   const isReplyInputOpen = replyingTo === comment.id;
+  const [replyContent, setReplyContent] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleReplySubmit = async () => {
+    if (!replyContent.trim() || isSubmitting || !onReplySubmit) return;
+
+    setIsSubmitting(true);
+    try {
+      await onReplySubmit(comment.id, replyContent.trim());
+      setReplyContent("");
+      onReplyToggle(comment.id); // Close reply input after submission
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <motion.div
@@ -53,12 +71,15 @@ export function CommentItem({
           <button className="transition-colors hover:text-primary">
             いいね
           </button>
-          <button
-            className="transition-colors hover:text-primary"
-            onClick={() => onReplyToggle(comment.id)}
-          >
-            返信
-          </button>
+          {/* AC-2: Only show reply button for top-level comments, not for nested replies */}
+          {!isReply && (
+            <button
+              className="transition-colors hover:text-primary"
+              onClick={() => onReplyToggle(comment.id)}
+            >
+              返信
+            </button>
+          )}
           <span>{comment.timestamp}</span>
           {comment.likes > 0 && <span>👍 {comment.likes}</span>}
         </div>
@@ -83,12 +104,17 @@ export function CommentItem({
                 <input
                   type="text"
                   placeholder="返信を入力..."
-                  className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary/50"
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                  disabled={isSubmitting}
+                  className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-all focus:border-primary/50 disabled:opacity-50"
                 />
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-lg bg-primary p-2 text-primary-foreground transition-all hover:bg-primary/90"
+                  onClick={handleReplySubmit}
+                  disabled={isSubmitting || !replyContent.trim()}
+                  className="rounded-lg bg-primary p-2 text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50"
                 >
                   <Send className="h-4 w-4" />
                 </motion.button>
@@ -108,6 +134,7 @@ export function CommentItem({
                 replyingTo={replyingTo}
                 currentUserAvatar={currentUserAvatar}
                 onReplyToggle={onReplyToggle}
+                onReplySubmit={onReplySubmit}
               />
             ))}
           </div>
