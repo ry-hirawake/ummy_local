@@ -110,30 +110,74 @@ export default function Home() {
     setShowReactions(showReactions === postId ? null : postId);
   };
 
-  const handleReactionSelect = (postId: string, reactionType: ReactionType) => {
-    setPosts(
-      posts.map((post) => {
-        if (post.id === postId) {
-          const newReactions = { ...post.reactions };
+  // Story-0013: Reaction handler with API integration and optimistic update
+  const handleReactionSelect = useCallback(
+    async (postId: string, reactionType: ReactionType) => {
+      // Find the current post state for rollback
+      const currentPost = posts.find((p) => p.id === postId);
+      if (!currentPost) return;
 
-          // Remove previous reaction if exists
-          if (post.userReaction) {
-            newReactions[post.userReaction as ReactionType]--;
+      const previousReactions = { ...currentPost.reactions };
+      const previousUserReaction = currentPost.userReaction;
+
+      // Calculate new state
+      const newReactions = { ...currentPost.reactions };
+      const isRemoving = currentPost.userReaction === reactionType;
+
+      if (currentPost.userReaction) {
+        newReactions[currentPost.userReaction as ReactionType]--;
+      }
+
+      if (!isRemoving) {
+        newReactions[reactionType]++;
+      }
+
+      const newUserReaction = isRemoving ? undefined : reactionType;
+
+      // Optimistic update
+      setPosts(
+        posts.map((post) =>
+          post.id === postId
+            ? { ...post, reactions: newReactions, userReaction: newUserReaction }
+            : post
+        )
+      );
+      setShowReactions(null);
+
+      // API call
+      try {
+        if (isRemoving) {
+          // DELETE to remove reaction
+          const response = await fetch(`/api/posts/${postId}/reactions`, {
+            method: "DELETE",
+          });
+          if (!response.ok && response.status !== 404) {
+            throw new Error("Failed to remove reaction");
           }
-
-          // Add new reaction or clear if same
-          if (post.userReaction !== reactionType) {
-            newReactions[reactionType]++;
-            return { ...post, reactions: newReactions, userReaction: reactionType };
+        } else {
+          // POST to add/update reaction
+          const response = await fetch(`/api/posts/${postId}/reactions`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type: reactionType }),
+          });
+          if (!response.ok) {
+            throw new Error("Failed to add reaction");
           }
-
-          return { ...post, reactions: newReactions, userReaction: undefined };
         }
-        return post;
-      })
-    );
-    setShowReactions(null);
-  };
+      } catch {
+        // EC-2: Rollback on network failure
+        setPosts(
+          posts.map((post) =>
+            post.id === postId
+              ? { ...post, reactions: previousReactions, userReaction: previousUserReaction }
+              : post
+          )
+        );
+      }
+    },
+    [posts]
+  );
 
   const handleCommentsToggle = (postId: string) => {
     setExpandedComments(expandedComments === postId ? null : postId);

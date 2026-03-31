@@ -7,7 +7,7 @@
 - 同じリアクション再選択で解除できる
 
 ## Status
-Accepted
+Done
 
 ## Goal
 - `FR-4.1` から `FR-4.4` を満たし、軽量なフィードバック手段を本機能として成立させる
@@ -50,9 +50,10 @@ Then リアクション集計と自分の選択状態が視覚的に分かる
 ## Test Mapping
 | AC | Test Suite | File |
 |---|---|---|
-| AC-1 | `Reactions / Create` | `src/__tests__/reactions.integration.test.tsx` |
-| AC-2 | `Reactions / ToggleAndReplace` | `src/__tests__/reactions.integration.test.tsx` |
-| AC-3 | `Reactions / DisplayState` | `src/__tests__/reactions.integration.test.tsx` |
+| AC-1 | `Reactions / Create` | `src/__tests__/reactions.integration.test.tsx` (2 tests) |
+| AC-2 | `Reactions / ToggleAndReplace` | `src/__tests__/reactions.integration.test.tsx` (3 tests) |
+| AC-3 | `Reactions / DisplayState` | `src/__tests__/reactions.integration.test.tsx` (2 tests) |
+| Service | `Reactions / ServiceLevel` | `src/__tests__/reactions.integration.test.tsx` (2 tests) |
 
 ## Research Questions (if needed)
 - RQ-1: 解消済み。初期フェーズでは 1 ユーザー 1 投稿の最終状態のみを保持し、履歴監査は将来要件として分離する

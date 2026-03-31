@@ -36,3 +36,5 @@
 - 2026-03-31 Story-0014: Codexレビューで DoD 達成を確認し Status を Done へ更新 / Impact: AC-1〜AC-3、EC-1/EC-2、全テスト、lint、build の品質ゲートを通過し、`story-0012` に着手可能
 - 2026-03-31 Story-0012: コメント・返信作成機能実装完了（CommentItem返信送信・返信ボタン制御、CommunityPostCardコメント送信、CommunityPageClient APIハンドラ、テスト7件追加） / Impact: FR-3.1〜FR-3.4準拠、POST /api/posts/{id}/comments経由でコメント・返信作成、1段階ネスト制限、コメント数リアルタイム反映
 - 2026-03-31 Story-0012: Codexレビューで DoD 達成を確認し Status を Done へ更新 / Impact: AC-1〜AC-3、EC-1、全テスト、lint、build の品質ゲートを通過し、`story-0013` に着手可能
+- 2026-03-31 Story-0013: 投稿リアクション機能実装完了（CommunityPageClient/page.tsxにAPI連携・optimistic update・rollback追加、テスト9件追加） / Impact: FR-4.1〜FR-4.4準拠、POST/DELETE /api/posts/{id}/reactions経由でリアクション追加・切替・解除、1ユーザー1投稿1リアクション制約、ネットワーク失敗時rollback対応
+- 2026-03-31 Story-0013: Codexレビューで DoD 達成を確認し Status を Done へ更新 / Impact: AC-1〜AC-3、EC-1/EC-2、全テスト、lint、build の品質ゲートを通過し、`story-0015` に着手可能

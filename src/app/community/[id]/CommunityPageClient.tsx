@@ -242,29 +242,74 @@ export function CommunityPageClient({
     [isPostSubmitting, communityId, posts]
   );
 
-  const handleReaction = (postId: string, reactionType: CommunityReactionType) => {
-    setPosts(
-      posts.map((post) => {
-        if (post.id !== postId) {
-          return post;
+  // Story-0013: Reaction handler with API integration and optimistic update
+  const handleReaction = useCallback(
+    async (postId: string, reactionType: CommunityReactionType) => {
+      // Find the current post state for rollback
+      const currentPost = posts.find((p) => p.id === postId);
+      if (!currentPost) return;
+
+      const previousReactions = { ...currentPost.reactions };
+      const previousUserReaction = currentPost.userReaction;
+
+      // Calculate new state
+      const newReactions = { ...currentPost.reactions };
+      const isRemoving = currentPost.userReaction === reactionType;
+
+      if (currentPost.userReaction) {
+        newReactions[currentPost.userReaction as CommunityReactionType]--;
+      }
+
+      if (!isRemoving) {
+        newReactions[reactionType]++;
+      }
+
+      const newUserReaction = isRemoving ? undefined : reactionType;
+
+      // Optimistic update
+      setPosts(
+        posts.map((post) =>
+          post.id === postId
+            ? { ...post, reactions: newReactions, userReaction: newUserReaction }
+            : post
+        )
+      );
+      setShowReactions(null);
+
+      // API call
+      try {
+        if (isRemoving) {
+          // DELETE to remove reaction
+          const response = await fetch(`/api/posts/${postId}/reactions`, {
+            method: "DELETE",
+          });
+          if (!response.ok && response.status !== 404) {
+            throw new Error("Failed to remove reaction");
+          }
+        } else {
+          // POST to add/update reaction
+          const response = await fetch(`/api/posts/${postId}/reactions`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type: reactionType }),
+          });
+          if (!response.ok) {
+            throw new Error("Failed to add reaction");
+          }
         }
-
-        const newReactions = { ...post.reactions };
-
-        if (post.userReaction) {
-          newReactions[post.userReaction as CommunityReactionType]--;
-        }
-
-        if (post.userReaction !== reactionType) {
-          newReactions[reactionType]++;
-          return { ...post, reactions: newReactions, userReaction: reactionType };
-        }
-
-        return { ...post, reactions: newReactions, userReaction: undefined };
-      })
-    );
-    setShowReactions(null);
-  };
+      } catch {
+        // EC-2: Rollback on network failure
+        setPosts(
+          posts.map((post) =>
+            post.id === postId
+              ? { ...post, reactions: previousReactions, userReaction: previousUserReaction }
+              : post
+          )
+        );
+      }
+    },
+    [posts]
+  );
 
   const toggleComments = (postId: string) => {
     setExpandedComments(expandedComments === postId ? null : postId);
