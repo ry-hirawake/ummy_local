@@ -68,6 +68,7 @@ function apiPostToCommunityPost(apiPost: ApiPost): CommunityPost {
     reactions: apiPost.reactions,
     userReaction: apiPost.userReaction,
     isPinned: apiPost.isPinned,
+    createdAt: apiPost.createdAt,
   };
 }
 
@@ -76,6 +77,7 @@ interface CommunityPageClientProps {
   communityId?: string;
   initialMembership?: boolean;
   initialPosts?: CommunityPost[];
+  userRole?: "owner" | "admin" | "member";
 }
 
 export function CommunityPageClient({
@@ -83,6 +85,7 @@ export function CommunityPageClient({
   communityId,
   initialMembership = true,
   initialPosts,
+  userRole,
 }: CommunityPageClientProps): React.ReactElement {
   const [posts, setPosts] = useState<CommunityPost[]>(initialPosts ?? []);
   const [isLoading, setIsLoading] = useState(!initialPosts && !!communityId);
@@ -116,7 +119,10 @@ export function CommunityPageClient({
       fetchedPosts.sort((a: CommunityPost, b: CommunityPost) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
-        return 0; // Keep API order for same pinned status
+        if (a.createdAt && b.createdAt) {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        return 0;
       });
 
       setPosts(fetchedPosts);
@@ -229,6 +235,7 @@ export function CommunityPageClient({
             lightbulb: 0,
             laugh: 0,
           },
+          createdAt: data.post.createdAt || new Date().toISOString(),
         };
 
         // Add new post at the top of the feed
@@ -405,6 +412,54 @@ export function CommunityPageClient({
     [posts]
   );
 
+  // Story-0017: Pin toggle handler with optimistic update
+  const canPin = userRole === "owner";
+
+  const handlePinToggle = useCallback(
+    async (postId: string, shouldPin: boolean) => {
+      if (!communityId) return;
+
+      const previousPosts = [...posts];
+
+      // Optimistic update: set isPinned and re-sort
+      setPosts((current) => {
+        const updated = current.map((p) => {
+          if (p.id === postId) return { ...p, isPinned: shouldPin };
+          // If pinning a new post, unpin the old one
+          if (shouldPin && p.isPinned) return { ...p, isPinned: false };
+          return p;
+        });
+        // Sort: pinned first, then by createdAt descending (newest first)
+        return updated.sort((a, b) => {
+          if (a.isPinned && !b.isPinned) return -1;
+          if (!a.isPinned && b.isPinned) return 1;
+          // Restore chronological order using createdAt
+          if (a.createdAt && b.createdAt) {
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          }
+          return 0;
+        });
+      });
+
+      try {
+        const response = await fetch(`/api/posts/${postId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isPinned: shouldPin }),
+        });
+
+        if (!response.ok) {
+          // Rollback on failure
+          setPosts(previousPosts);
+        }
+      } catch {
+        // Rollback on network error
+        setPosts(previousPosts);
+      }
+    },
+    [communityId, posts]
+  );
+
   // Loading state
   if (isLoading) {
     return (
@@ -521,6 +576,8 @@ export function CommunityPageClient({
                 expandedComments={expandedComments === post.id}
                 replyingTo={replyingTo}
                 currentUserAvatar={currentUserAvatar}
+                canPin={canPin}
+                onPinToggle={handlePinToggle}
                 onReactionToggle={() =>
                   setShowReactions(showReactions === post.id ? null : post.id)
                 }

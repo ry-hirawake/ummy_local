@@ -32,6 +32,7 @@ export interface CommunityPost {
   };
   userReaction?: string;
   isPinned?: boolean;
+  createdAt?: string;
   commentList?: Comment[];
 }
 

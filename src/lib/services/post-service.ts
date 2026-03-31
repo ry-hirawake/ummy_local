@@ -54,6 +54,39 @@ export class PostService {
     return ok(enriched);
   }
 
+  async updatePin(
+    postId: string,
+    userId: string,
+    isPinned: boolean
+  ): Promise<ServiceResult<PostEntity>> {
+    const post = await this.repos.posts.findById(postId);
+    if (!post) return fail("NOT_FOUND", "投稿が見つかりません");
+
+    const membership = await this.repos.memberships.findByUserAndCommunity(
+      userId,
+      post.communityId
+    );
+    if (!membership || membership.role !== "owner") {
+      return fail("FORBIDDEN", "ピン留め操作はコミュニティ作成者のみ可能です");
+    }
+
+    // EC-1: Only one pinned post per community — unpin existing
+    if (isPinned) {
+      const communityPosts = await this.repos.posts.findByCommunityId(
+        post.communityId
+      );
+      for (const p of communityPosts) {
+        if (p.isPinned && p.id !== postId) {
+          await this.repos.posts.update(p.id, { isPinned: false });
+        }
+      }
+    }
+
+    const updated = await this.repos.posts.update(postId, { isPinned });
+    if (!updated) return fail("NOT_FOUND", "投稿の更新に失敗しました");
+    return ok(updated);
+  }
+
   async create(input: CreatePostInput): Promise<ServiceResult<PostEntity>> {
     // Validate content
     const trimmedContent = input.content.trim();

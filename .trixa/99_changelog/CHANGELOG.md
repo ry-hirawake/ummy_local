@@ -43,3 +43,5 @@
 - 2026-04-01 Story-0016: コメント/リアクション通知の生成・未読バッジ・通知一覧・既読化を実装（CommentService/ReactionService通知生成、NotificationBell/NotificationPanelコンポーネント、countUnread API、テスト10件追加） / Impact: FR-7.1〜FR-7.4準拠、自己通知抑止(EC-1)、個別既読化、未読件数バッジ対応
 - 2026-04-01 Story-0016: Codexレビューで Done 判定を保留し、対象投稿遷移・投稿識別情報・不足テストを Blockers に起票 / Impact: `story-0016` は `Implemented` 維持、Claude は通知UXと検証不足を修正してから再レビュー
 - 2026-04-01 Story-0016: 再レビューで「遷移成功後に既読化」の順序が未達と判明し、既読化タイミング要件を Blockers に追加 / Impact: 投稿識別と投稿遷移は充足したが、`story-0016` は `Implemented` 維持
+- 2026-04-01 Story-0017: コミュニティ管理者ピン留め/解除機能実装完了（PostService.updatePin権限チェック+1ピン制約、PATCH /api/posts/{id}、CommunityPostCardドロップダウンメニュー、Optimistic Update、テスト11件追加） / Impact: FR-8.1〜FR-8.3準拠、owner/adminのみピン留め操作可能、1コミュニティ1ピン制約強制
+- 2026-04-01 Story-0017: Codexレビューで Done 判定を保留し、解除後の時系列復帰・権限モデル差分・不足テストを Blockers に起票 / Impact: `story-0017` は `Implemented` 維持、Claude は並び順と権限整合を修正してから再レビュー

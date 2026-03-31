@@ -3,6 +3,7 @@ import { getServices } from "@/lib/services";
 import { getSession } from "@/lib/auth/session";
 import type { CommunityInfo, CommunityPost } from "./_data";
 import type { Comment } from "@/types/post";
+import type { MembershipRole } from "@/types/entities";
 import { CommunityPageClient } from "./CommunityPageClient";
 
 interface CommunityPageProps {
@@ -73,6 +74,7 @@ function toCommunityPost(post: EnrichedPostLike, commentList?: Comment[]): Commu
     reactions: post.reactions,
     userReaction: post.userReaction,
     isPinned: post.isPinned,
+    createdAt: post.createdAt.toISOString(),
     commentList,
   };
 }
@@ -88,13 +90,16 @@ export default async function CommunityPage({
     notFound();
   }
 
-  // Check if current user is a member
+  // Check if current user is a member and get their role
   const session = await getSession();
   let isMember = false;
+  let userRole: MembershipRole | undefined;
   if (session?.user?.id) {
     const members = await services.communities.getMembers(id);
     if (members.success) {
-      isMember = members.data.some((m) => m.userId === session.user.id);
+      const currentMember = members.data.find((m) => m.userId === session.user.id);
+      isMember = !!currentMember;
+      userRole = currentMember?.role as MembershipRole | undefined;
     }
   }
 
@@ -142,6 +147,7 @@ export default async function CommunityPage({
       communityId={id}
       initialMembership={isMember}
       initialPosts={initialPosts}
+      userRole={userRole}
     />
   );
 }

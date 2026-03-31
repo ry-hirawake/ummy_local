@@ -29,6 +29,8 @@ interface CommunityPostCardProps {
   expandedComments: boolean;
   replyingTo: string | null;
   currentUserAvatar: string;
+  canPin?: boolean;
+  onPinToggle?: (postId: string, shouldPin: boolean) => void;
   onReactionToggle: () => void;
   onReactionSelect: (reactionType: CommunityReactionType) => void;
   onCommentsToggle: () => void;
@@ -44,6 +46,8 @@ export function CommunityPostCard({
   expandedComments,
   replyingTo,
   currentUserAvatar,
+  canPin,
+  onPinToggle,
   onReactionToggle,
   onReactionSelect,
   onCommentsToggle,
@@ -55,6 +59,7 @@ export function CommunityPostCard({
   const totalReactions = Object.values(post.reactions).reduce((a, b) => a + b, 0);
   const [commentContent, setCommentContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   const handleCommentSubmit = async () => {
     if (!commentContent.trim() || isSubmitting || !onCommentSubmit) return;
@@ -112,13 +117,38 @@ export function CommunityPostCard({
             </div>
           </div>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          className="rounded-full p-1.5 transition-all hover:bg-muted"
-        >
-          <MoreHorizontal className="h-4 w-4" />
-        </motion.button>
+        <div className="relative">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setShowMenu(!showMenu)}
+            className="rounded-full p-1.5 transition-all hover:bg-muted"
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </motion.button>
+
+          <AnimatePresence>
+            {showMenu && canPin && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="absolute right-0 top-full z-10 mt-1 min-w-[160px] rounded-lg border border-border bg-card p-1 shadow-lg"
+              >
+                <button
+                  onClick={() => {
+                    onPinToggle?.(post.id, !post.isPinned);
+                    setShowMenu(false);
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted"
+                >
+                  <Pin className="h-4 w-4" />
+                  {post.isPinned ? "ピン留め解除" : "ピン留め"}
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Content */}
